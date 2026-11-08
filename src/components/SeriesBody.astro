@@ -77,14 +77,4 @@ function sizesFor(row: Row, i: number): string {
     margin-bottom: var(--gap);
   }
 
-  /* ───────── 逐张 Single ───────── */
-  [data-view='single'] .sb { display: flex; flex-direction: column; align-items: center; }
-  [data-view='single'] :is(.g, .r) { display: contents; }
-  [data-view='single'] .sb .ph {
-    width: min(calc(100% - 2 * var(--gutter)), calc(76svh * var(--r)));
-    margin: 12svh 0;
-    scroll-snap-align: center;
-  }
-  [data-view='single'] .sb .ph:first-child { margin-top: 4svh; }
-  html[data-view='single'] { scroll-snap-type: y proximity; }
 </style>

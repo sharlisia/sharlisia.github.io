@@ -10,7 +10,12 @@ const pad = (n: number) => String(n).padStart(2, '0');
 const anchor = (title: string) => title.toLowerCase().replace(/\s+/g, '-');
 // 编号：系列不编号，随拍按 01、02… 编
 let k = 0;
-const chapters = series.map((s) => ({ ...s, id: anchor(s.title), num: s.part === 'series' ? 'Series' : pad(++k) }));
+const chapters = series.map((s) => ({
+  ...s,
+  id: anchor(s.title),
+  num: s.part === 'series' ? 'Series' : pad(++k),
+  photos: s.groups.flatMap((g) => g.rows.flatMap((r) => r.photos)), // 与页面上的照片顺序一致
+}));
 const parts = [
   { label: 'Series', items: chapters.filter((c) => c.part === 'series') },
   { label: 'Notes', items: chapters.filter((c) => c.part === 'notes') },
@@ -18,18 +23,13 @@ const parts = [
 const views = [
   { id: 'album', label: 'Album' },
   { id: 'grid', label: 'Grid' },
-  { id: 'single', label: 'Single' },
+  { id: 'gallery', label: 'Gallery' },
 ];
 ---
 
 <Base section="photography">
-  <div class="views" role="group" aria-label="View" slot="tools">
-    {views.map((v) => <button type="button" data-view-btn={v.id}>{v.label}</button>)}
-    <span class="sep" aria-hidden="true"></span>
-    <button type="button" data-play>Play</button>
-  </div>
-
-  <nav class="rail" aria-label="Chapters" data-rail-nav>
+  <nav class="rail" aria-label="Chapters">
+    <div data-dock>
     {parts.map((p) => (
       <div class="rail-part">
         <p class="muted rail-label">{p.label}</p>
@@ -48,7 +48,34 @@ const views = [
         </ol>
       </div>
     ))}
+    </div>
+    <div class="rail-part">
+      <p class="muted rail-label">View</p>
+      <div class="views" role="group" aria-label="View">
+        {views.map((v) => <button type="button" data-view-btn={v.id}>{v.label}</button>)}
+        <button type="button" data-play>Play</button>
+      </div>
+    </div>
   </nav>
+
+  <!-- 画廊视图：大图 + 底部缩略图条 -->
+  <div class="gal" data-gal>
+    <div class="gal-stage" data-gal-stage>
+      <img alt="" data-gal-img />
+    </div>
+    <p class="gal-cap muted" data-gal-cap></p>
+    <div class="gal-strip" data-gal-strip>
+      {chapters.map((c) => (
+        <div class="gal-ch" data-gal-ch={c.id}>
+          {c.photos.map((p) => (
+            <button type="button" class="gal-th" aria-label={c.title}>
+              <Image src={p.src} alt="" width={200} format="webp" quality={70} loading="lazy" />
+            </button>
+          ))}
+        </div>
+      ))}
+    </div>
+  </div>
 
   <main id="top">
     <section class="intro" data-theme-zone="light">
@@ -98,7 +125,12 @@ const views = [
       <img alt="" data-b />
     </div>
     <div class="show-bar">
-      <span data-cap></span>
+      <span class="show-left">
+        <span class="show-chs">
+          {chapters.map((c) => <button type="button" data-show-ch={c.id}>{c.title}</button>)}
+        </span>
+        <span class="show-count" data-cap></span>
+      </span>
       <span class="show-ctrl">
         <button type="button" data-prev>Prev</button>
         <button type="button" data-toggle>Pause</button>
@@ -116,6 +148,36 @@ const views = [
   const figures = $$<HTMLElement>('.ch .ph');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const pad2 = (n: number) => String(n).padStart(2, '0');
+  const chOf = (i: number) => figures[i].closest<HTMLElement>('.ch')!;
+  const caption = (i: number) => {
+    const ch = chOf(i);
+    const inCh = $$('.ph', ch);
+    return `${ch.dataset.title} ${ch.dataset.zh}  —  ${pad2(inCh.indexOf(figures[i]) + 1)} / ${pad2(inCh.length)}`;
+  };
+  const centerOn = (el: Element) => {
+    const b = el.getBoundingClientRect();
+    scrollTo({ top: scrollY + b.top + b.height / 2 - innerHeight / 2, behavior: 'instant' });
+  };
+
+  /* ── 当前章节：目录高亮 + 深色章节切换背景 ── */
+  let current: HTMLElement | null = null;
+  function setCurrent(el: HTMLElement | null, theme?: string) {
+    current = el;
+    html.dataset.theme = theme ?? el?.dataset.themeZone ?? 'light';
+    $$('[data-rail]').forEach((a) => a.classList.toggle('active', !!el && a.dataset.rail === el.id));
+  }
+  const spy = new IntersectionObserver(
+    (es) => {
+      if (html.dataset.view === 'gallery') return;
+      for (const e of es) {
+        if (!e.isIntersecting) continue;
+        const el = e.target as HTMLElement;
+        setCurrent(el.classList.contains('ch') ? el : null, el.dataset.themeZone);
+      }
+    },
+    { rootMargin: '-50% 0px -50% 0px' },
+  );
+  $$('[data-theme-zone]').forEach((z) => spy.observe(z));
 
   /* ── 淡入 ── */
   const revealIO = new IntersectionObserver(
@@ -123,131 +185,165 @@ const views = [
     { rootMargin: '0px 0px -6% 0px' },
   );
 
+  /* ── 画廊视图 ── */
+  const gal = $('[data-gal]');
+  const galImg = $<HTMLImageElement>('[data-gal-img]');
+  const galCap = $('[data-gal-cap]');
+  const thumbs = $$<HTMLButtonElement>('.gal-th');
+  let gi = 0;
+  function galSelect(i: number, scrollStrip = true) {
+    gi = (i + figures.length) % figures.length;
+    const src = figures[gi].querySelector('img')!;
+    galImg.classList.remove('on');
+    galImg.sizes = '(max-width: 899px) 100vw, 70vw';
+    galImg.srcset = src.srcset;
+    galImg.src = src.src;
+    galImg.decode().then(() => galImg.classList.add('on'), () => galImg.classList.add('on'));
+    galCap.textContent = caption(gi);
+    thumbs.forEach((t, k) => t.classList.toggle('on', k === gi));
+    if (scrollStrip) thumbs[gi].scrollIntoView({ inline: 'center', block: 'nearest', behavior: reduce ? 'instant' : 'smooth' });
+    setCurrent(chOf(gi));
+  }
+  thumbs.forEach((t, k) => t.addEventListener('click', () => galSelect(k, false)));
+  $('[data-gal-stage]').addEventListener('click', (e) => galSelect((e as MouseEvent).clientX < innerWidth / 2 + 100 ? gi - 1 : gi + 1));
+
   /* ── 视图切换 ── */
-  const sizesFor: Record<string, (img: HTMLImageElement, r: number) => string> = {
+  const sizesFor: Record<string, (img: HTMLImageElement) => string> = {
     album: (img) => img.dataset.sizes || '100vw',
     grid: () => '(max-width: 640px) 50vw, 22vw',
-    single: (_, r) => `(max-width: 640px) 100vw, min(80vw, ${Math.round(76 * r)}vh)`,
+    gallery: (img) => img.dataset.sizes || '100vw',
   };
-  function setView(view: string, keepPlace = true) {
-    if (!(view in sizesFor)) return;
-    const mid = innerHeight / 2;
-    const anchorFig = keepPlace
-      ? figures.find((f) => { const b = f.getBoundingClientRect(); return b.bottom > mid * 0.6 && b.top < innerHeight; })
-      : undefined;
+  function visibleFigure() {
+    return figures.find((f) => { const b = f.getBoundingClientRect(); return b.bottom > innerHeight * 0.3 && b.top < innerHeight; });
+  }
+  function setView(view: string, init = false) {
+    if (!(view in sizesFor)) view = 'album';
+    const prev = html.dataset.view;
+    // 记住当前位置：画廊里选中的那张，或视口里的那张
+    const anchorFig = init ? undefined : prev === 'gallery' ? figures[gi] : visibleFigure();
     html.dataset.view = view;
     try { localStorage.setItem('view', view); } catch {}
     $$('[data-view-btn]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.viewBtn === view)));
     figures.forEach((f) => {
       const img = f.querySelector('img')!;
-      img.sizes = sizesFor[view](img, parseFloat(f.dataset.r || '1'));
-      if (keepPlace) f.classList.add('in');
+      img.sizes = sizesFor[view](img);
+      if (!init) f.classList.add('in');
     });
-    if (anchorFig) {
-      const b = anchorFig.getBoundingClientRect();
-      scrollTo({ top: scrollY + b.top + b.height / 2 - innerHeight / 2, behavior: 'instant' });
+    if (view === 'gallery') {
+      galSelect(anchorFig ? figures.indexOf(anchorFig) : current ? figures.indexOf($('.ph', current)) : 0);
+      scrollTo({ top: 0, behavior: 'instant' });
+    } else if (anchorFig) {
+      centerOn(anchorFig);
     }
   }
   $$('[data-view-btn]').forEach((b) => b.addEventListener('click', () => setView(b.dataset.viewBtn!)));
-  setView(html.dataset.view || 'album', false);
+  setView(html.dataset.view || 'album', true);
   $$('.reveal').forEach((el) => revealIO.observe(el));
 
-  /* ── 当前章节：目录高亮 + 深色章节自动切换背景 ── */
-  let current: HTMLElement | null = null;
-  const spy = new IntersectionObserver(
-    (es) => {
-      for (const e of es) {
-        if (!e.isIntersecting) continue;
-        const el = e.target as HTMLElement;
-        html.dataset.theme = el.dataset.themeZone;
-        current = el.classList.contains('ch') ? el : null;
-        $$('[data-rail]').forEach((a) => a.classList.toggle('active', !!current && a.dataset.rail === current.id));
-      }
-    },
-    { rootMargin: '-50% 0px -50% 0px' },
-  );
-  $$('[data-theme-zone]').forEach((z) => spy.observe(z));
+  // 画廊视图下，点目录 = 跳到该章第一张
+  $$<HTMLAnchorElement>('a[href^="#"]').forEach((a) => a.addEventListener('click', (e) => {
+    if (html.dataset.view !== 'gallery') return;
+    const ch = document.getElementById(a.getAttribute('href')!.slice(1));
+    if (!ch?.classList.contains('ch')) return;
+    e.preventDefault();
+    galSelect(figures.indexOf($('.ph', ch)));
+  }));
 
   /* ── 目录 Dock 效果：悬停时封面抽出，离鼠标越近放得越大 ── */
-  const rail = $('[data-rail-nav]');
-  const items = $$('.ri', rail);
+  const dock = $('[data-dock]');
+  const items = $$('.ri', dock);
   let centers: number[] = [];
-  rail.addEventListener('mouseenter', () => {
+  dock.addEventListener('mouseenter', () => {
     centers = items.map((it) => { const b = it.getBoundingClientRect(); return b.top + b.height / 2; });
-    rail.classList.add('open');
+    dock.classList.add('open');
   });
-  rail.addEventListener('mousemove', (e) => {
+  dock.addEventListener('mousemove', (e) => {
     if (reduce) return;
     items.forEach((it, i) => {
       const t = Math.max(0, 1 - Math.abs(e.clientY - centers[i]) / 110);
       it.style.setProperty('--s', (1 + 1.6 * t * t * (3 - 2 * t)).toFixed(3)); // smoothstep 衰减
     });
   });
-  rail.addEventListener('mouseleave', () => {
-    rail.classList.remove('open');
+  dock.addEventListener('mouseleave', () => {
+    dock.classList.remove('open');
     items.forEach((it) => it.style.removeProperty('--s'));
   });
 
-  /* ── 全屏轮播 ── */
+  /* ── 全屏查看 / 轮播（Play，以及 Grid 下单击放大） ── */
   const show = $('[data-show]');
   const imgs = [$<HTMLImageElement>('[data-a]', show), $<HTMLImageElement>('[data-b]', show)];
   const cap = $('[data-cap]', show);
   const toggle = $<HTMLButtonElement>('[data-toggle]', show);
-  let idx = 0, front = 0, timer = 0, playing = true;
+  let idx = 0, front = 0, timer = 0, playing = false;
 
-  const srcImg = (f: HTMLElement) => f.querySelector('img')!;
   function display(i: number) {
     idx = (i + figures.length) % figures.length;
-    const src = srcImg(figures[idx]);
+    const src = figures[idx].querySelector('img')!;
     const back = imgs[1 - front];
     back.sizes = '100vw';
     back.srcset = src.srcset;
     back.src = src.src;
     const swap = () => { back.classList.add('on'); imgs[front].classList.remove('on'); front = 1 - front; };
     back.decode().then(swap, swap);
-    const ch = figures[idx].closest<HTMLElement>('.ch')!;
+    const ch = chOf(idx);
     const inCh = $$('.ph', ch);
-    cap.textContent = `${ch.dataset.title} ${ch.dataset.zh}  —  ${pad2(inCh.indexOf(figures[idx]) + 1)} / ${pad2(inCh.length)}`;
-    const pre = new Image(); pre.sizes = '100vw'; pre.srcset = srcImg(figures[(idx + 1) % figures.length]).srcset;
+    cap.textContent = `${pad2(inCh.indexOf(figures[idx]) + 1)} / ${pad2(inCh.length)}`;
+    $$('[data-show-ch]', show).forEach((b) => b.classList.toggle('on', b.dataset.showCh === ch.id));
+    const pre = new Image(); pre.sizes = '100vw'; pre.srcset = figures[(idx + 1) % figures.length].querySelector('img')!.srcset;
   }
   function schedule() { clearInterval(timer); if (playing) timer = window.setInterval(() => display(idx + 1), 5000); }
   function setPlaying(p: boolean) { playing = p; toggle.textContent = p ? 'Pause' : 'Play'; schedule(); }
-  function openShow() {
-    const vis = figures.find((f) => { const b = f.getBoundingClientRect(); return b.top >= 0 && b.top < innerHeight; });
-    const start = vis ?? (current ? $('.ph', current) : figures[0]);
+  function openShow(start: number, autoplay: boolean) {
     show.hidden = false; html.classList.add('lock');
     imgs.forEach((im) => im.classList.remove('on'));
-    display(figures.indexOf(start));
-    setPlaying(!reduce);
+    display(start);
+    setPlaying(autoplay && !reduce);
   }
   function closeShow() {
     show.hidden = true; html.classList.remove('lock'); clearInterval(timer);
-    const b = figures[idx].getBoundingClientRect();
-    scrollTo({ top: scrollY + b.top + b.height / 2 - innerHeight / 2, behavior: 'instant' });
+    if (html.dataset.view === 'gallery') galSelect(idx);
+    else centerOn(figures[idx]);
   }
-  $$('[data-play]').forEach((b) => b.addEventListener('click', openShow));
+  $$('[data-play]').forEach((b) => b.addEventListener('click', () => {
+    const start = html.dataset.view === 'gallery' ? figures[gi] : visibleFigure() ?? (current ? $('.ph', current) : figures[0]);
+    openShow(figures.indexOf(start), true);
+  }));
+  // Album / Grid：单击放大预览
+  figures.forEach((f, i) => f.addEventListener('click', () => { if (html.dataset.view !== 'gallery') openShow(i, false); }));
+
+  $$('[data-show-ch]', show).forEach((b) => b.addEventListener('click', () => {
+    display(figures.indexOf($('.ph', document.getElementById(b.dataset.showCh!)!)));
+    schedule();
+  }));
   $('[data-close]', show).addEventListener('click', closeShow);
   $('[data-prev]', show).addEventListener('click', () => { display(idx - 1); schedule(); });
   $('[data-next]', show).addEventListener('click', () => { display(idx + 1); schedule(); });
   toggle.addEventListener('click', () => setPlaying(!playing));
   $('[data-stage]', show).addEventListener('click', (e) => { display((e as MouseEvent).clientX < innerWidth / 2 ? idx - 1 : idx + 1); schedule(); });
+
   addEventListener('keydown', (e) => {
-    if (show.hidden) return;
-    if (e.key === 'Escape') closeShow();
-    else if (e.key === 'ArrowRight') { display(idx + 1); schedule(); }
-    else if (e.key === 'ArrowLeft') { display(idx - 1); schedule(); }
-    else if (e.key === ' ') { e.preventDefault(); setPlaying(!playing); }
+    if (!show.hidden) {
+      if (e.key === 'Escape') closeShow();
+      else if (e.key === 'ArrowRight') { display(idx + 1); schedule(); }
+      else if (e.key === 'ArrowLeft') { display(idx - 1); schedule(); }
+      else if (e.key === ' ') { e.preventDefault(); setPlaying(!playing); }
+    } else if (html.dataset.view === 'gallery') {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); galSelect(gi + 1); }
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); galSelect(gi - 1); }
+    }
   });
 </script>
 
 <style>
-  .views { display: flex; align-items: center; gap: 18px; }
+  .views { display: flex; flex-wrap: wrap; gap: 6px 14px; }
   .views button,
   .sheet-views button { color: var(--muted); transition: color 0.3s; }
   .views button:hover,
   .views button[aria-pressed='true'],
   .sheet-views button[aria-pressed='true'] { color: var(--fg); }
-  .sep { width: 1px; height: 12px; background: var(--line); }
+
+  /* Album / Grid 下照片可单击放大 */
+  :global(html:not([data-view='gallery'])) .ch :global(.ph) { cursor: zoom-in; }
 
   /* ── 左侧目录 ── */
   .rail {
@@ -257,7 +353,8 @@ const views = [
     left: var(--gutter);
     width: calc(var(--rail) - var(--gutter) - 16px);
   }
-  .rail-part + .rail-part { margin-top: 28px; }
+  .rail-part + .rail-part,
+  [data-dock] + .rail-part { margin-top: 28px; }
   .rail-label { margin: 0 0 10px; font-size: 11px; letter-spacing: 0.04em; }
   .rail ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
   .ri {
@@ -284,13 +381,13 @@ const views = [
     transition: width 0.25s var(--ease), height 0.25s var(--ease), opacity 0.3s var(--ease);
   }
   .thumb :global(img) { width: 100%; height: 100%; object-fit: cover; }
-  .rail.open .ri { gap: 10px; }
-  .rail.open .thumb {
+  .open .ri { gap: 10px; }
+  .open .thumb {
     opacity: 1;
     width: calc(30px * var(--s));
     height: calc(22px * var(--s));
   }
-  .rail.open .ri:hover .thumb { box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18); }
+  .open .ri:hover .thumb { box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18); }
 
   main { padding-left: var(--rail); }
 
@@ -322,9 +419,56 @@ const views = [
 
   .foot { display: flex; justify-content: space-between; gap: 16px; padding: 20vh var(--gutter) 28px; }
 
+  /* ── 画廊视图 ── */
+  .gal { display: none; }
+  :global(html[data-view='gallery']) main > :global(*:not(.foot)) { display: none; }
+  :global(html[data-view='gallery']) .foot { display: none; }
+  :global(html[data-view='gallery']) .gal {
+    position: fixed;
+    inset: var(--header) 0 0 var(--rail);
+    display: flex;
+    flex-direction: column;
+  }
+  .gal-stage {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    margin: 2vh var(--gutter) 0;
+    cursor: pointer;
+  }
+  .gal-stage img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0;
+    transition: opacity 0.6s var(--ease);
+  }
+  .gal-stage img.on { opacity: 1; }
+  .gal-cap { margin: 14px var(--gutter) 12px; white-space: pre; }
+  .gal-strip {
+    display: flex;
+    gap: 22px;
+    overflow-x: auto;
+    padding: 0 var(--gutter) 20px;
+    scrollbar-width: none;
+  }
+  .gal-strip::-webkit-scrollbar { display: none; }
+  .gal-ch { display: flex; gap: 6px; flex: none; }
+  .gal-th {
+    flex: none;
+    height: 64px;
+    opacity: 0.45;
+    transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+  }
+  .gal-th :global(img) { height: 100%; width: auto; }
+  .gal-th:hover { opacity: 0.85; }
+  .gal-th.on { opacity: 1; transform: translateY(-4px); }
+
   @media (max-width: 899px) {
-    .rail,
-    .views { display: none; }
+    .rail { display: none; }
+    .gal-th { height: 52px; }
     .intro { padding-top: calc(var(--header) + 14vh); padding-bottom: 10vh; }
   }
 
@@ -358,9 +502,21 @@ const views = [
     align-items: center;
     justify-content: space-between;
     padding: 0 var(--gutter);
-    white-space: pre;
   }
-  .show-ctrl { display: flex; gap: 20px; }
+  .show-left { display: flex; align-items: center; gap: 24px; min-width: 0; }
+  .show-chs { display: flex; gap: 16px; overflow-x: auto; scrollbar-width: none; }
+  .show-chs::-webkit-scrollbar { display: none; }
+  .show-chs button { flex: none; color: #6f6f6b; transition: color 0.3s; }
+  .show-chs button:hover { color: #c8c8c4; }
+  .show-chs button.on { color: #fff; }
+  .show-count { flex: none; color: #8a8a86; }
+  .show-ctrl { display: flex; gap: 20px; flex: none; padding-left: 24px; }
+  @media (max-width: 640px) {
+    .show-bar { flex-direction: column; align-items: stretch; justify-content: center; gap: 10px; height: 88px; }
+    .show-stage { bottom: 88px; }
+    .show-left { justify-content: space-between; }
+    .show-ctrl { padding-left: 0; justify-content: space-between; }
+  }
   .show-ctrl button { color: #8a8a86; transition: color 0.3s; }
   .show-ctrl button:hover { color: #fff; }
 
