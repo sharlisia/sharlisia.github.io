@@ -2,6 +2,7 @@ title: Taste
 zh: 味
 order: 6
 cover: 09
+backdrop: 10
 hidden: [11, 14, 17]
 groups:
   - rows:

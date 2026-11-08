@@ -13,7 +13,7 @@ npm run dev        # 本地预览 http://localhost:4321 ，改动实时刷新
 
 ```bash
 git add -A && git commit -m "更新照片" && git push   # 保存源码
-npm run deploy                                        # 构建并发布到 https://sqxw7n.github.io/sharlisia/
+npm run deploy                                        # 构建并发布：主页 https://sqxw7n.github.io/sharlisia/ ，摄影 /photo/
 ```
 
 ## 添加照片

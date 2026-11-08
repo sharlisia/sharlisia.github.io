@@ -4,12 +4,12 @@ import { site } from '../site.config';
 
 interface Props {
   title?: string;
-  section: 'photography' | 'media-art' | 'graphic-design';
+  section: 'home' | 'photography' | 'media-art' | 'graphic-design';
 }
 const { title, section } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const nav = [
-  { id: 'photography', label: 'Photography', href: base },
+  { id: 'photography', label: 'Photography', href: `${base}photo/` },
   { id: 'media-art', label: 'Media Art', href: `${base}media-art/` },
   { id: 'graphic-design', label: 'Graphic Design', href: `${base}graphic-design/` },
 ] as const;
@@ -35,7 +35,7 @@ const nav = [
   <body>
     <header class="top">
       <div class="top-left">
-        <a href={base} class="mark">{site.name}</a>
+        <a href={base} class="mark" aria-current={section === 'home' ? 'page' : undefined}>Hi, I'm {site.name}</a>
         <nav class="sections" aria-label="Sections">
           {nav.map((n) => <a href={n.href} aria-current={n.id === section ? 'page' : undefined}>{n.label}</a>)}
         </nav>
