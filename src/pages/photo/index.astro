@@ -19,11 +19,23 @@ const views = [
   { id: 'grid', label: 'Grid' },
   { id: 'gallery', label: 'Gallery' },
 ];
-const HERO_SIZES = '(min-width: 900px) calc(100vw - 200px), 100vw';
+const HERO_SIZES = '100vw';
 ---
 
 <Base section="photography">
   <nav class="rail" aria-label="Albums">
+    <!-- 收起时：一个视图小图标 + 每个相册一条短线 -->
+    <div class="rail-mini" aria-hidden="true">
+      <svg class="mini-icon" width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+        <rect x="0" y="0" width="6" height="6" rx="1" /><rect x="8" y="0" width="6" height="6" rx="1" />
+        <rect x="0" y="8" width="6" height="6" rx="1" /><rect x="8" y="8" width="6" height="6" rx="1" />
+      </svg>
+      <span class="mini-lines">
+        {albums.map((c) => <i data-mini={c.id}></i>)}
+      </span>
+    </div>
+    <!-- 悬停时展开 -->
+    <div class="rail-panel">
     <div class="rail-part">
       <p class="muted rail-label">View</p>
       <div class="views" role="group" aria-label="View">
@@ -45,6 +57,7 @@ const HERO_SIZES = '(min-width: 900px) calc(100vw - 200px), 100vw';
           </li>
         ))}
       </ol>
+    </div>
     </div>
   </nav>
 
@@ -162,6 +175,7 @@ const HERO_SIZES = '(min-width: 900px) calc(100vw - 200px), 100vw';
     current = el;
     html.dataset.theme = theme ?? el?.dataset.themeZone ?? 'light';
     $$('[data-rail]').forEach((a) => a.classList.toggle('active', !!el && a.dataset.rail === el.id));
+    $$('[data-mini]').forEach((m) => m.classList.toggle('active', !!el && m.dataset.mini === el.id));
   }
   const spy = new IntersectionObserver(
     (es) => {
@@ -405,9 +419,60 @@ const HERO_SIZES = '(min-width: 900px) calc(100vw - 200px), 100vw';
     position: fixed;
     z-index: 30;
     top: 30vh;
-    left: var(--gutter);
-    width: calc(var(--rail) - var(--gutter) - 16px);
+    left: calc(var(--gutter) - 12px);
   }
+
+  /* 收起状态：小竖条，半透明底 + 毛玻璃，压在照片上也看得清 */
+  .rail-mini {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 12px 10px;
+    border-radius: 4px;
+    color: var(--muted);
+    background: color-mix(in srgb, var(--bg) 70%, transparent);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    transition: opacity 0.25s var(--ease) 0.15s, background-color 0.9s var(--ease);
+  }
+  .mini-lines { display: flex; flex-direction: column; gap: 7px; }
+  .mini-lines i {
+    display: block;
+    width: 12px;
+    height: 1.5px;
+    border-radius: 1px;
+    background: currentColor;
+    transition: width 0.4s var(--ease), background-color 0.4s var(--ease);
+  }
+  .mini-lines i.active { width: 20px; background: var(--accent); }
+
+  /* 展开状态：悬停（或键盘聚焦）时出现，底色更实 */
+  .rail-panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 230px;
+    padding: 14px 18px 18px 12px;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--bg) 90%, transparent);
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 12px 40px rgba(40, 24, 80, 0.1);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-6px);
+    transition: opacity 0.3s var(--ease) 0.15s, transform 0.3s var(--ease) 0.15s, visibility 0s linear 0.45s;
+  }
+  .rail:hover .rail-panel,
+  .rail:focus-within .rail-panel {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition: opacity 0.3s var(--ease) 0.06s, transform 0.3s var(--ease) 0.06s, visibility 0s;
+  }
+  .rail:hover .rail-mini,
+  .rail:focus-within .rail-mini { opacity: 0; transition-delay: 0s; }
   .rail-part + .rail-part { margin-top: 32px; }
   .rail-label { margin: 0 0 10px; font-size: 11px; letter-spacing: 0.04em; }
   .rail ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }

@@ -7,7 +7,7 @@ const { groups } = Astro.props;
 
 // sizes 按"编排"视图估算；切换视图时由脚本改写（见 index.astro）
 const M = '(max-width: 640px)';
-const MAIN = '(min-width: 900px) calc(100vw - 200px), 100vw';
+const MAIN = '100vw';
 function sizesFor(row: Row, i: number): string {
   switch (row.layout) {
     case 'full': return MAIN;
