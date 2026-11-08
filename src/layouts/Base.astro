@@ -30,6 +30,10 @@ const nav = [
         var t = localStorage.getItem('theme');
         if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t;
       } catch (e) {}
+      // 临时：?logo=corinthia 预览备选 logo 字体
+      try {
+        if (new URLSearchParams(location.search).get('logo') === 'corinthia') document.documentElement.dataset.logo = 'corinthia';
+      } catch (e) {}
       try {
         var v = new URLSearchParams(location.search).get('view') || localStorage.getItem('view');
         if (v === 'single') v = 'gallery';
@@ -105,6 +109,11 @@ const nav = [
     white-space: nowrap;
     margin-right: 48px;
     padding-top: 4px; /* 花体的视觉重心偏上，往下压一点与导航对齐 */
+  }
+  :global(html[data-logo='corinthia']) .mark {
+    font-family: 'Corinthia', var(--sans);
+    font-size: 40px;
+    padding-top: 2px;
   }
   .sections { display: flex; gap: 22px; }
   .sections a,

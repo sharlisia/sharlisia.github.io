@@ -26,7 +26,7 @@ groups:
       - wide: 09
       - row: [22, 00]
   - rows:
-      - row: [23, 24]
+      - row: [23, 33, 24]
   - rows:
       - wide: 28
       - row: [26, 27]

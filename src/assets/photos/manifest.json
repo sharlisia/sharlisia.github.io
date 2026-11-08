@@ -47,10 +47,6 @@
     "original": "building/微信图片_20261107102038_396_132.jpg",
     "sha1": "88325f513bacc504bc6bc2cd9602b886e19e703c"
   },
-  "building/building-13.jpg": {
-    "original": "building/微信图片_20261107102038_397_132.jpg",
-    "sha1": "5bbe0adba1815bc5e12e4b3f39e4e55360b0c1a4"
-  },
   "building/building-14.jpg": {
     "original": "building/微信图片_20261107102038_398_132.jpg",
     "sha1": "76af39431eab98ef10c799617ce32b182e02f070"
@@ -630,5 +626,9 @@
   "shine/shine-20.jpg": {
     "original": "shine/IMG_20210826_184128_mh1629974612895.jpg",
     "sha1": "73711f34a5e7f6ac9181990297ff72b42fd0a44a"
+  },
+  "deep/deep-33.jpg": {
+    "original": "deep/微信图片_20261107102038_397_132.jpg",
+    "sha1": "5bbe0adba1815bc5e12e4b3f39e4e55360b0c1a4"
   }
 }

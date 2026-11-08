@@ -18,5 +18,4 @@ groups:
       - row: [03, 05]
       - row: [06, 07]
   - rows:
-      - center: 13
       - row: [12, 14]
