@@ -1,8 +1,12 @@
+# 备用：GitHub Actions 自动部署。
+# 目前用 `npm run deploy` 发布到 gh-pages 分支（账号 Actions 被账单问题锁定）。
+# 想改回自动部署：1) 解决 GitHub 账单问题  2) 取消下面 push 的注释
+# 3) 仓库 Settings → Pages → Source 选 "GitHub Actions"
 name: Deploy to GitHub Pages
 
 on:
-  push:
-    branches: [main]
+  # push:
+  #   branches: [main]
   workflow_dispatch:
 
 permissions:
