@@ -1,0 +1,43 @@
+---
+import { Image } from 'astro:assets';
+import type { Photo } from '../lib/photos';
+
+interface Props {
+  photo: Photo;
+  sizes: string;
+  eager?: boolean;
+  class?: string;
+  style?: string;
+}
+const { photo, sizes, eager = false, class: cls, style } = Astro.props;
+// 网站只用压缩后的 webp，最大 2000px 宽，原图不会被发布
+const widths = [640, 1080, 1600, 2000].filter((w) => w <= photo.src.width);
+if (!widths.length) widths.push(photo.src.width);
+---
+
+<figure class:list={['ph', cls]} style={`--r:${photo.ratio.toFixed(4)};${style ?? ''}`}>
+  <Image
+    src={photo.src}
+    alt=""
+    widths={widths}
+    sizes={sizes}
+    format="webp"
+    quality={78}
+    loading={eager ? 'eager' : 'lazy'}
+    fetchpriority={eager ? 'high' : 'auto'}
+    decoding="async"
+  />
+</figure>
+
+<style>
+  .ph {
+    background: var(--ph);
+    aspect-ratio: var(--r);
+    overflow: hidden;
+  }
+  .ph :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+</style>

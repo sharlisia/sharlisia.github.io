@@ -1,0 +1,90 @@
+---
+import Photo from './Photo.astro';
+import type { Group, Row } from '../lib/photos';
+
+interface Props { groups: Group[] }
+const { groups } = Astro.props;
+
+const MOBILE = '(max-width: 640px)';
+
+function sizesFor(row: Row, i: number): string {
+  switch (row.layout) {
+    case 'full': return '100vw';
+    case 'wide':
+    case 'stack': return `${MOBILE} 100vw, min(92vw, 1760px)`;
+    case 'center': return `${MOBILE} 100vw, min(80vw, ${Math.round(88 * row.photos[i].ratio)}vh)`;
+    case 'left':
+    case 'right': return `${MOBILE} 82vw, 56vw`;
+    case 'row': {
+      const sum = row.photos.reduce((s, p) => s + p.ratio, 0);
+      const share = Math.round((row.photos[i].ratio / sum) * 92);
+      return `${MOBILE} ${row.photos.length > 2 && i === 0 ? 100 : 50}vw, ${share}vw`;
+    }
+  }
+}
+---
+
+<div class="series-body">
+  {groups.map((g) => (
+    <section class="group">
+      {g.title && <h2 class="group-title label">{g.title}</h2>}
+      {g.rows.map((row) => (
+        <div class={`r r-${row.layout}`} data-n={row.photos.length}>
+          {row.photos.map((p, i) => (
+            <Photo photo={p} sizes={sizesFor(row, i)} class="reveal" style={row.layout === 'row' ? `transition-delay:${i * 120}ms` : ''} />
+          ))}
+        </div>
+      ))}
+    </section>
+  ))}
+</div>
+
+<style is:global>
+  .group + .group { margin-top: var(--group-space); }
+  .group-title {
+    padding: 0 var(--gutter);
+    margin: 0 0 24px;
+    color: var(--muted);
+    font-weight: 450;
+  }
+
+  .r {
+    padding: 0 var(--gutter);
+    max-width: calc(1760px + 2 * var(--gutter));
+    margin: 0 auto;
+  }
+  .r + .r { margin-top: var(--row-space); }
+  /* 大图前后多留一点呼吸 */
+  .r-full + .r,
+  .r + .r-full,
+  .r-center + .r,
+  .r + .r-center,
+  .r-left + .r,
+  .r-right + .r { margin-top: calc(var(--row-space) * 4); }
+
+  .r-full { padding: 0; max-width: none; }
+
+  .r-center { display: flex; justify-content: center; }
+  .r-center .ph { width: min(100%, calc(88svh * var(--r))); }
+
+  .r-left .ph,
+  .r-right .ph { width: min(56%, calc(88svh * var(--r))); }
+  .r-right .ph { margin-left: auto; }
+  .r-left .ph { margin-right: auto; margin-left: 6%; }
+
+  /* 多张并排：flex-grow 等于宽高比 → 自动等高 */
+  .r-row { display: flex; gap: var(--gap); align-items: flex-start; }
+  .r-row .ph { flex: var(--r) 1 0; min-width: 0; }
+
+  .r-stack { display: flex; flex-direction: column; gap: 6px; }
+
+  @media (max-width: 640px) {
+    .r-center .ph { width: 100%; }
+    .r-left .ph,
+    .r-right .ph { width: 82%; margin-left: 0; }
+    .r-right .ph { margin-left: auto; }
+    .r-row { flex-wrap: wrap; }
+    .r-row[data-n='3'] .ph:first-child,
+    .r-row[data-n='4'] .ph:first-child { flex-basis: 100%; }
+  }
+</style>

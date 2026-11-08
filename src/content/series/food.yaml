@@ -1,0 +1,18 @@
+title: Food
+order: 7
+cover: 09
+hidden: [11, 14, 17]
+groups:
+  - rows:
+      - center: 09
+      - row: [10, 02]
+  - rows:
+      - row: [12, 13]
+      - row: [05, 06]
+  - rows:
+      - center: 07
+      - row: [08, 15]
+  - rows:
+      - row: [00, 01, 03]
+      - wide: 04
+      - center: 16

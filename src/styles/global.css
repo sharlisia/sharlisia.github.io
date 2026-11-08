@@ -1,0 +1,84 @@
+@import '@fontsource/cormorant-garamond/300.css';
+@import '@fontsource/cormorant-garamond/300-italic.css';
+@import '@fontsource/cormorant-garamond/400.css';
+@import '@fontsource-variable/inter/wght.css';
+
+:root {
+  --bg: #f2f0eb;
+  --fg: #141414;
+  --muted: #8b877f;
+  --line: rgba(20, 20, 20, 0.12);
+  --ph: #e4e1da;
+
+  --serif: 'Cormorant Garamond', 'Songti SC', 'STSong', Georgia, serif;
+  --sans: 'Inter Variable', -apple-system, 'PingFang SC', 'Helvetica Neue', sans-serif;
+
+  --gutter: clamp(16px, 4vw, 64px);
+  --gap: clamp(10px, 1.4vw, 24px);
+  --row-space: clamp(10px, 1.4vw, 24px);
+  --group-space: clamp(96px, 20vh, 240px);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[data-theme='dark'] {
+  --bg: #0d0d0d;
+  --fg: #ebe8e2;
+  --muted: #77736c;
+  --line: rgba(235, 232, 226, 0.14);
+  --ph: #1b1b1b;
+}
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html {
+  background: var(--bg);
+  color: var(--fg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  font-family: var(--sans);
+  font-size: 13px;
+  letter-spacing: 0.01em;
+  background: var(--bg);
+  color: var(--fg);
+  overflow-x: hidden;
+  transition: background-color 0.6s var(--ease), color 0.6s var(--ease);
+}
+
+a { color: inherit; text-decoration: none; }
+figure { margin: 0; }
+img { display: block; max-width: 100%; height: auto; }
+
+.label {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 450;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.display {
+  font-family: var(--serif);
+  font-weight: 300;
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+}
+
+/* 进入视口时的淡入（仅在 JS 可用时启用，无 JS 照常显示） */
+.js .reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 1.4s var(--ease), transform 1.4s var(--ease);
+}
+.js .reveal.in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .js .reveal { opacity: 1; transform: none; transition: none; }
+  body { transition: none; }
+}

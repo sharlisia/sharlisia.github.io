@@ -1,0 +1,105 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import '../styles/global.css';
+import { site } from '../site.config';
+
+interface Props {
+  title?: string;
+  theme?: 'light' | 'dark';
+  overlayHeader?: boolean;
+}
+const { title, theme = 'light', overlayHeader = false } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const pageTitle = title ? `${title} — ${site.name}` : site.name;
+const path = Astro.url.pathname;
+---
+
+<!doctype html>
+<html lang="en" data-theme={theme}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={site.description} />
+    <link rel="icon" href={`${base}favicon.svg`} type="image/svg+xml" />
+    <script is:inline>document.documentElement.classList.add('js');</script>
+    <ClientRouter fallback="swap" />
+  </head>
+  <body>
+    <header class:list={['site-header', { overlay: overlayHeader }]}>
+      <a href={base} class="brand">{site.name}</a>
+      <nav class="label">
+        <a href={`${base}photography/`} class:list={{ active: path.includes('/photography') }}>Photography</a>
+      </nav>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer class="site-footer label">
+      <span>© {new Date().getFullYear()} {site.name}</span>
+      {site.email && <a href={`mailto:${site.email}`}>{site.email}</a>}
+    </footer>
+
+    <script>
+      function initReveal() {
+        const els = document.querySelectorAll('.reveal:not(.in)');
+        if (!('IntersectionObserver' in window)) {
+          els.forEach((el) => el.classList.add('in'));
+          return;
+        }
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const e of entries) {
+              if (e.isIntersecting) {
+                e.target.classList.add('in');
+                io.unobserve(e.target);
+              }
+            }
+          },
+          { rootMargin: '0px 0px -8% 0px' },
+        );
+        els.forEach((el) => io.observe(el));
+      }
+      document.addEventListener('astro:page-load', initReveal);
+    </script>
+  </body>
+</html>
+
+<style>
+  .site-header {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 50;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 22px var(--gutter);
+    color: #fff;
+    mix-blend-mode: difference;
+    pointer-events: none;
+  }
+  .site-header a { pointer-events: auto; }
+  .brand {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 24px;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
+  nav a {
+    opacity: 0.7;
+    transition: opacity 0.3s;
+  }
+  nav a:hover,
+  nav a.active { opacity: 1; }
+
+  .site-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 64px var(--gutter) 32px;
+    color: var(--muted);
+  }
+</style>

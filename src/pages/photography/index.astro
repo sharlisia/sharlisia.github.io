@@ -1,0 +1,28 @@
+---
+import Base from '../../layouts/Base.astro';
+import SeriesIndex from '../../components/SeriesIndex.astro';
+import { getSeries } from '../../lib/photos';
+
+const series = await getSeries();
+const total = series.reduce((n, s) => n + s.count, 0);
+---
+
+<Base title="Photography">
+  <header class="head">
+    <h1 class="display">Photography</h1>
+    <p class="label">{series.length} series — {total} photographs</p>
+  </header>
+  <SeriesIndex series={series} />
+</Base>
+
+<style>
+  .head {
+    padding: clamp(140px, 26vh, 280px) var(--gutter) clamp(64px, 12vh, 140px);
+  }
+  h1 {
+    margin: 0 0 20px;
+    font-size: clamp(56px, 11vw, 200px);
+    font-style: italic;
+  }
+  p { margin: 0; color: var(--muted); }
+</style>

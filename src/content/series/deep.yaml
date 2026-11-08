@@ -1,0 +1,29 @@
+title: Deep
+order: 4
+cover: 06
+hidden: [04, 07, 17]
+groups:
+  - rows:
+      - full: 06
+      - row: [08, 02]
+      - wide: 05
+  - rows:
+      - row: [10, 11]
+      - full: 14
+      - row: [01, 03]
+  - rows:
+      - row: [12, 13]
+      - center: 25
+      - right: 15
+  - rows:
+      - center: 29
+      - row: [16, 18]
+      - row: [19, 20, 21]
+      - row: [30, 31, 32]
+      - wide: 09
+      - row: [22, 00]
+  - rows:
+      - row: [23, 24]
+  - rows:
+      - wide: 28
+      - row: [26, 27]

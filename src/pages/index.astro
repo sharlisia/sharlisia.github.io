@@ -1,0 +1,99 @@
+---
+import Base from '../layouts/Base.astro';
+import Photo from '../components/Photo.astro';
+import SeriesIndex from '../components/SeriesIndex.astro';
+import { getSeries, resolve } from '../lib/photos';
+import { site } from '../site.config';
+
+const series = await getSeries();
+const heroes = site.hero.map((id) => resolve(id, ''));
+---
+
+<Base overlayHeader>
+  <section class="hero" data-hero>
+    {heroes.map((p, i) => (
+      <Photo photo={p} sizes="100vw" eager={i === 0} class:list={['hero-img', { on: i === 0 }]} />
+    ))}
+    <div class="hero-text">
+      <h1 class="display">{site.name}</h1>
+      <p class="label">{series.length} series — {series.reduce((n, s) => n + s.count, 0)} photographs</p>
+    </div>
+  </section>
+
+  <section class="works">
+    <SeriesIndex series={series} />
+  </section>
+</Base>
+
+<script>
+  function initHero() {
+    const hero = document.querySelector('[data-hero]');
+    if (!hero || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const imgs = [...hero.querySelectorAll('.hero-img')];
+    if (imgs.length < 2) return;
+    let i = 0;
+    const t = setInterval(() => {
+      if (!document.body.contains(hero)) return clearInterval(t);
+      imgs[i].classList.remove('on');
+      i = (i + 1) % imgs.length;
+      imgs[i].classList.add('on');
+    }, 6000);
+  }
+  document.addEventListener('astro:page-load', initHero);
+</script>
+
+<style>
+  .hero {
+    position: relative;
+    height: 100svh;
+    overflow: hidden;
+    background: #0d0d0d;
+    color: #fff;
+  }
+  .hero :global(.hero-img) {
+    position: absolute;
+    inset: 0;
+    aspect-ratio: auto;
+    background: transparent;
+    opacity: 0;
+    transition: opacity 2.4s var(--ease);
+  }
+  .hero :global(.hero-img img) {
+    transform: scale(1.06);
+    transition: transform 9s linear;
+  }
+  .hero :global(.hero-img.on) { opacity: 1; }
+  .hero :global(.hero-img.on img) { transform: scale(1); }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: 55% 0 0 0;
+    background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.38));
+    pointer-events: none;
+  }
+  .hero-text {
+    position: absolute;
+    z-index: 1;
+    left: var(--gutter);
+    right: var(--gutter);
+    bottom: clamp(24px, 5vh, 56px);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+  }
+  .hero-text h1 {
+    margin: 0;
+    font-size: clamp(64px, 14vw, 240px);
+    font-style: italic;
+    margin-bottom: -0.12em;
+  }
+  .hero-text p { margin: 0; opacity: 0.85; }
+
+  .works { padding: clamp(96px, 18vh, 200px) 0 0; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero :global(.hero-img img) { transform: none; transition: none; }
+  }
+</style>

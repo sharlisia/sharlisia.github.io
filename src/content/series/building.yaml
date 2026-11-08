@@ -1,0 +1,19 @@
+title: Building
+order: 1
+cover: 08
+hidden: [15, 16]
+groups:
+  - rows:
+      - center: 08
+      - row: [00, 02]
+      - wide: 01
+  - rows:
+      - row: [04, 09]
+      - left: 10
+      - right: 11
+  - rows:
+      - row: [03, 05]
+      - row: [06, 07]
+  - rows:
+      - center: 13
+      - row: [12, 14]

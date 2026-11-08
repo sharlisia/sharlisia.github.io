@@ -1,0 +1,77 @@
+---
+import Base from '../../layouts/Base.astro';
+import SeriesBody from '../../components/SeriesBody.astro';
+import Photo from '../../components/Photo.astro';
+import { getSeries } from '../../lib/photos';
+
+export async function getStaticPaths() {
+  const all = await getSeries();
+  return all.map((s, i) => ({
+    params: { slug: s.slug },
+    props: { s, index: i, total: all.length, next: all[(i + 1) % all.length] },
+  }));
+}
+
+const { s, index, total, next } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+
+<Base title={s.title} theme={s.theme}>
+  <header class="head">
+    <p class="label meta">{pad(index + 1)} / {pad(total)}</p>
+    <h1 class="display">{s.title}</h1>
+    <p class="label meta">{s.count} photographs</p>
+  </header>
+
+  <SeriesBody groups={s.groups} />
+
+  <a href={`${base}photography/${next.slug}/`} class="next">
+    <span class="label meta">Next</span>
+    <span class="display next-title">{next.title}</span>
+    <div class="next-img">
+      <Photo photo={next.cover} sizes="(max-width: 640px) 60vw, 22vw" />
+    </div>
+  </a>
+</Base>
+
+<style>
+  .head {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 12px 24px;
+    padding: clamp(140px, 28vh, 300px) var(--gutter) clamp(64px, 14vh, 160px);
+  }
+  .head .meta:first-child { grid-column: 1 / -1; }
+  h1 {
+    margin: 0;
+    font-size: clamp(64px, 15vw, 260px);
+    font-style: italic;
+    margin-bottom: -0.1em;
+  }
+  .meta { margin: 0; color: var(--muted); }
+
+  .next {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 12px 24px;
+    margin-top: var(--group-space);
+    padding: clamp(48px, 10vh, 120px) var(--gutter) 0;
+    border-top: 1px solid var(--line);
+    margin-left: var(--gutter);
+    margin-right: var(--gutter);
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .next .meta { grid-column: 1 / -1; }
+  .next-title {
+    font-size: clamp(48px, 10vw, 180px);
+    font-style: italic;
+    transition: transform 0.9s var(--ease);
+  }
+  .next:hover .next-title { transform: translateX(1.5vw); }
+  .next-img { width: clamp(120px, 18vw, 320px); }
+  .next-img :global(.ph) { aspect-ratio: 4 / 5; }
+</style>

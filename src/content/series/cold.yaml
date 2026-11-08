@@ -1,0 +1,31 @@
+title: Cold
+order: 6
+cover: 05
+hidden: [36, 42]
+groups:
+  - rows:
+      - stack: [04, 05, 06]
+  - rows:
+      - full: 13
+      - stack: [11, 12, 14]
+      - row: [09, 10]
+      - center: 18
+  - rows:
+      - row: [01, 02, 08]
+      - left: 07
+      - right: 21
+      - center: 28
+      - row: [00, 03]
+  - rows:
+      - center: 30
+      - row: [31, 32]
+      - row: [33, 34]
+      - row: [35, 37]
+      - row: [38, 39, 40]
+      - row: [41, 25]
+  - rows:
+      - row: [15, 16]
+      - row: [19, 23]
+      - row: [22, 24, 26]
+      - row: [17, 20]
+      - row: [27, 29]

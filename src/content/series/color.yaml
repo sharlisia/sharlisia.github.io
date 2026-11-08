@@ -1,0 +1,16 @@
+title: Color
+order: 2
+cover: 03
+theme: dark
+groups:
+  - rows:
+      - full: 03
+      - row: [02, 04]
+  - rows:
+      - center: 01
+      - row: [00, 07]
+  - rows:
+      - row: [05, 06]
+  - rows:
+      - full: 09
+      - row: [08, 10]

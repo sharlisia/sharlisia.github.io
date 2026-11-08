@@ -1,0 +1,21 @@
+title: Plant
+order: 5
+cover: 03
+hidden: [11, 19]
+groups:
+  - rows:
+      - full: 00
+      - center: 03
+      - row: [04, 09]
+  - rows:
+      - row: [07, 10]
+      - center: 12
+      - row: [06, 14, 13]
+      - row: [05, 08]
+  - rows:
+      - row: [01, 02]
+      - row: [17, 16, 18]
+      - left: 15
+  - rows:
+      - wide: 21
+      - wide: 20
