@@ -115,17 +115,17 @@ const nav = [
     justify-content: space-between;
     padding: 0 var(--gutter);
   }
-  /* 底色：上面三分之一实色，从三分之一处往下渐变到透明（下沿多延伸 14px），避免硬边。
+  /* 底色：上面约 45% 实色，往下按缓动曲线渐变到完全透明（下沿多延伸 22px），末端无硬边。
      用遮罩做渐变，切换深浅色时颜色仍能平滑过渡 */
   .top::before {
     content: '';
     position: absolute;
-    inset: 0 0 -14px 0;
+    inset: 0 0 -22px 0;
     z-index: -1;
     pointer-events: none;
     background: var(--bg);
-    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 33%, transparent 100%);
-    mask-image: linear-gradient(to bottom, #000 0%, #000 33%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 45%, rgba(0,0,0,.86) 54%, rgba(0,0,0,.66) 63%, rgba(0,0,0,.44) 72%, rgba(0,0,0,.25) 81%, rgba(0,0,0,.11) 89%, rgba(0,0,0,.03) 95%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0%, #000 45%, rgba(0,0,0,.86) 54%, rgba(0,0,0,.66) 63%, rgba(0,0,0,.44) 72%, rgba(0,0,0,.25) 81%, rgba(0,0,0,.11) 89%, rgba(0,0,0,.03) 95%, transparent 100%);
     transition: background-color 0.9s var(--ease);
   }
   .top-left { display: flex; align-items: center; }

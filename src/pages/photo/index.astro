@@ -607,8 +607,7 @@ const HERO_SIZES = '100vw';
   /* ── 头图 ── */
   .hero {
     position: relative;
-    height: calc(100svh - var(--header));
-    margin-top: var(--header);
+    height: 100svh; /* 从页面最顶端开始，顶栏浮在照片上 */
     overflow: hidden;
     background: #111;
     color: #fff;
