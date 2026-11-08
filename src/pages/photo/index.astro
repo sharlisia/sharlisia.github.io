@@ -141,9 +141,9 @@ const HERO_SIZES = '100vw';
     </section>
 
     {albums.map((c) => (
-      <section class="ch" id={c.id} data-zone data-title={c.title} data-zh={c.zh ?? ''}>
+      <section class="ch" id={c.id} data-zone data-title={c.title} data-zh={c.zh ?? ''} style={c.tint ? `--tint:${c.tint}` : undefined}>
         <!-- 背景：低透明度 + 视差 -->
-        <div class="ch-bg" aria-hidden="true" style={c.tint ? `--tint:${c.tint}` : undefined}>
+        <div class="ch-bg" aria-hidden="true">
           <Image
             src={c.backdrop.src}
             alt=""
