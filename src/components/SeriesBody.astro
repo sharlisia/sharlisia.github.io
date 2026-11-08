@@ -40,29 +40,67 @@ function sizesFor(row: Row, i: number): string {
 </div>
 
 <style is:global>
-  /* ───────── 编排 Album ───────── */
-  [data-view='album'] .g + .g { margin-top: clamp(80px, 16vh, 200px); }
+  /* ───────── 编排 Album：杂志式的松弛节奏 ─────────
+     - 行与行之间大段留白
+     - 奇数行偏左、偶数行偏右（不左右顶满）
+     - 同一行里高低错开（--drop：下沉幅度）
+     - 通栏大图保持铺满，作为每组的视觉重音 */
+  [data-view='album'] {
+    --row-gap: clamp(56px, 11vh, 140px); /* 行与行之间 */
+    --col-gap: clamp(20px, 3.4vw, 64px); /* 同一行图与图之间 */
+    --shift: 11vw; /* 左右偏移量 */
+    --drop: 7vw; /* 高低错落 */
+  }
+  [data-view='album'] .g + .g { margin-top: clamp(140px, 26vh, 320px); }
   [data-view='album'] .r { padding: 0 var(--gutter); }
-  [data-view='album'] .r + .r { margin-top: var(--gap); }
-  [data-view='album'] :is(.r-full, .r-center, .r-left, .r-right) + .r,
-  [data-view='album'] .r + :is(.r-full, .r-center, .r-left, .r-right) { margin-top: calc(var(--gap) * 5); }
+  [data-view='album'] .r + .r { margin-top: var(--row-gap); }
 
+  /* 左右交替：奇数行右侧留白，偶数行左侧留白 */
+  [data-view='album'] .g > .r:nth-child(odd):not(.r-full, .r-center) { padding-right: calc(var(--gutter) + var(--shift)); }
+  [data-view='album'] .g > .r:nth-child(even):not(.r-full, .r-center) { padding-left: calc(var(--gutter) + var(--shift)); }
+
+  /* 通栏：铺满，前后多留一点 */
   [data-view='album'] .r-full { padding: 0; }
+
+  /* 居中单张：限制高度，四周大量留白 */
   [data-view='album'] .r-center { display: flex; justify-content: center; }
-  [data-view='album'] .r-center .ph { width: min(100%, calc(86svh * var(--r))); }
-  [data-view='album'] :is(.r-left, .r-right) .ph { width: min(52%, calc(86svh * var(--r))); }
-  [data-view='album'] .r-left .ph { margin-left: 8%; }
-  [data-view='album'] .r-right .ph { margin-left: auto; margin-right: 8%; }
-  [data-view='album'] .r-row { display: flex; gap: var(--gap); align-items: flex-start; }
+  [data-view='album'] .r-center .ph { width: min(78%, calc(80svh * var(--r))); }
+
+  /* 大图：不再左右顶满，跟随奇偶行偏左或偏右 */
+  [data-view='album'] .r-wide .ph { width: min(100%, calc(84svh * var(--r))); }
+  [data-view='album'] .g > .r-wide:nth-child(even) .ph { margin-left: auto; }
+
+  /* 偏左 / 偏右的单张 */
+  [data-view='album'] :is(.r-left, .r-right) .ph { width: min(48%, calc(80svh * var(--r))); }
+  [data-view='album'] .r-left .ph { margin-left: 4%; }
+  [data-view='album'] .r-right .ph { margin-left: auto; margin-right: 4%; }
+
+  /* 多张一行：等高但高低错开，间距拉大 */
+  [data-view='album'] .r-row { display: flex; gap: var(--col-gap); align-items: flex-start; }
   [data-view='album'] .r-row .ph { flex: var(--r) 1 0; min-width: 0; }
-  [data-view='album'] .r-stack { display: flex; flex-direction: column; gap: 4px; }
+  [data-view='album'] .r-row[data-n='2'] .ph:nth-child(2) { margin-top: var(--drop); }
+  [data-view='album'] .g > .r-row[data-n='2']:nth-child(even) .ph:nth-child(1) { margin-top: var(--drop); }
+  [data-view='album'] .g > .r-row[data-n='2']:nth-child(even) .ph:nth-child(2) { margin-top: 0; }
+  [data-view='album'] .r-row[data-n='3'] .ph:nth-child(2) { margin-top: calc(var(--drop) * 1.3); }
+  [data-view='album'] .r-row[data-n='3'] .ph:nth-child(3) { margin-top: calc(var(--drop) * 0.45); }
+  [data-view='album'] .r-row[data-n='4'] .ph:nth-child(even) { margin-top: var(--drop); }
+
+  /* 连拍序列：保持紧贴，宽度收窄一点 */
+  [data-view='album'] .r-stack { display: flex; flex-direction: column; gap: 6px; }
 
   @media (max-width: 640px) {
+    [data-view='album'] {
+      --row-gap: 48px;
+      --col-gap: 12px;
+      --shift: 10vw;
+      --drop: 9vw;
+    }
+    [data-view='album'] .g + .g { margin-top: 110px; }
     [data-view='album'] .r-center .ph { width: 100%; }
     [data-view='album'] :is(.r-left, .r-right) .ph { width: 84%; margin-left: 0; margin-right: 0; }
     [data-view='album'] .r-right .ph { margin-left: auto; }
     [data-view='album'] .r-row { flex-wrap: wrap; }
-    [data-view='album'] .r-row:is([data-n='3'], [data-n='4']) .ph:first-child { flex-basis: 100%; }
+    [data-view='album'] .r-row:is([data-n='3'], [data-n='4']) .ph:first-child { flex-basis: 100%; margin-top: 0; }
   }
 
   /* ───────── 瀑布流 Grid ───────── */
