@@ -14,6 +14,12 @@ const albums = series.map((s, i) => ({
   num: pad(i + 1),
   photos: s.groups.flatMap((g) => g.rows.flatMap((r) => r.photos)), // 与页面上的照片顺序一致
 }));
+// 页脚：每次构建自动写入当月，如 11/2026
+const now = new Date();
+const lastUpdate = `${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+// 深色 / 浅色切换图标：半实心圆
+const THEME_ICON = '<circle cx="7" cy="7" r="6" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M7 1a6 6 0 0 1 0 12z" fill="currentColor"/>';
+
 // 三种看法各自的小图标（14×14）
 const views = [
   {
@@ -42,17 +48,24 @@ const HERO_SIZES = '100vw';
   <nav class="rail" aria-label="Albums">
     <!-- 收起时：三个看法小图标 + 每个相册一条短线 -->
     <div class="rail-mini" aria-hidden="true">
+      <svg class="vi mini-theme" width="14" height="14" viewBox="0 0 14 14" set:html={THEME_ICON} />
       <span class="mini-views">
         {views.map((v) => (
           <svg class="vi" data-mini-view={v.id} width="14" height="14" viewBox="0 0 14 14" fill="currentColor" set:html={v.icon} />
         ))}
       </span>
       <span class="mini-lines">
-        {albums.map((c) => <i data-mini={c.id}></i>)}
+        {albums.map((c) => <i data-mini={c.id}><span>{c.title}</span></i>)}
       </span>
     </div>
     <!-- 悬停时展开 -->
     <div class="rail-panel">
+    <div class="rail-part">
+      <button type="button" class="theme-btn" data-theme-toggle>
+        <svg class="vi" width="12" height="12" viewBox="0 0 14 14" aria-hidden="true" set:html={THEME_ICON} />
+        <span data-theme-label>Light</span>
+      </button>
+    </div>
     <div class="rail-part">
       <p class="muted rail-label">View</p>
       <div class="views" role="group" aria-label="View">
@@ -104,7 +117,7 @@ const HERO_SIZES = '100vw';
 
   <main id="top">
     <!-- 头图：每个相册的封面轮播 -->
-    <section class="hero" data-theme-zone="light" data-hero>
+    <section class="hero" data-zone data-hero>
       {albums.map((c, i) => (
         <a href={`#${c.id}`} class:list={['hero-slide', { on: i === 0 }]} data-slide={i} tabindex="-1">
           <Image
@@ -130,7 +143,7 @@ const HERO_SIZES = '100vw';
     </section>
 
     {albums.map((c) => (
-      <section class="ch" id={c.id} data-theme-zone={c.theme} data-title={c.title} data-zh={c.zh ?? ''}>
+      <section class="ch" id={c.id} data-zone data-title={c.title} data-zh={c.zh ?? ''}>
         <!-- 背景：低透明度 + 视差 -->
         <div class="ch-bg" aria-hidden="true" style={c.tint ? `--tint:${c.tint}` : undefined}>
           <Image
@@ -155,8 +168,7 @@ const HERO_SIZES = '100vw';
     ))}
 
     <footer class="foot muted">
-      <span>© {new Date().getFullYear()} {site.name}</span>
-      {site.email && <a href={`mailto:${site.email}`}>{site.email}</a>}
+      <span>Last update {lastUpdate}</span>
     </footer>
   </main>
 
@@ -169,6 +181,7 @@ const HERO_SIZES = '100vw';
     </div>
     <div class="sheet-views">
       {views.map((v) => <button type="button" data-view-btn={v.id} data-close-sheet>{v.label}</button>)}
+      <button type="button" class="sheet-theme" data-theme-toggle><span data-theme-label>Light</span></button>
     </div>
   </div>
 
@@ -192,10 +205,24 @@ const HERO_SIZES = '100vw';
   };
 
   /* ── 当前相册：目录高亮 + 深色相册切换背景 ── */
+  /* ── 深色 / 浅色切换：全站统一，记住选择 ── */
+  function syncThemeUI() {
+    const dark = html.dataset.theme === 'dark';
+    // 按钮上写的是"点了会切到什么"
+    $$('[data-theme-label]').forEach((l) => { l.textContent = dark ? 'Light' : 'Dark'; });
+    $$('[data-theme-toggle]').forEach((b) => b.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode'));
+  }
+  $$('[data-theme-toggle]').forEach((b) => b.addEventListener('click', () => {
+    html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
+    try { localStorage.setItem('theme', html.dataset.theme); } catch {}
+    syncThemeUI();
+  }));
+  syncThemeUI();
+
+  /* ── 当前相册：目录高亮 ── */
   let current: HTMLElement | null = null;
-  function setCurrent(el: HTMLElement | null, theme?: string) {
+  function setCurrent(el: HTMLElement | null) {
     current = el;
-    html.dataset.theme = theme ?? el?.dataset.themeZone ?? 'light';
     $$('[data-rail]').forEach((a) => a.classList.toggle('active', !!el && a.dataset.rail === el.id));
     $$('[data-mini]').forEach((m) => m.classList.toggle('active', !!el && m.dataset.mini === el.id));
   }
@@ -205,12 +232,12 @@ const HERO_SIZES = '100vw';
       for (const e of es) {
         if (!e.isIntersecting) continue;
         const el = e.target as HTMLElement;
-        setCurrent(el.classList.contains('ch') ? el : null, el.dataset.themeZone);
+        setCurrent(el.classList.contains('ch') ? el : null);
       }
     },
     { rootMargin: '-50% 0px -50% 0px' },
   );
-  $$('[data-theme-zone]').forEach((z) => spy.observe(z));
+  $$('[data-zone]').forEach((z) => spy.observe(z));
 
   /* ── 滑动渐显：同一批进入视口的照片按位置依次浮现 ── */
   const revealIO = new IntersectionObserver(
@@ -443,7 +470,7 @@ const HERO_SIZES = '100vw';
     position: fixed;
     z-index: 30;
     top: 30vh;
-    left: calc(var(--gutter) - 12px);
+    left: 14px; /* 落在左侧 72px 的窄条里 */
   }
 
   /* 收起状态：小竖条，半透明底 + 毛玻璃，压在照片上也看得清 */
@@ -470,7 +497,32 @@ const HERO_SIZES = '100vw';
     background: currentColor;
     transition: width 0.4s var(--ease), background-color 0.4s var(--ease);
   }
-  .mini-lines i.active { width: 24px; background: var(--accent); }
+  .mini-lines i span { display: none; }
+  /* 当前相册：不画横线，直接写名字 */
+  .mini-lines i.active {
+    width: auto;
+    height: auto;
+    background: none;
+    color: var(--accent);
+  }
+  .mini-lines i.active span {
+    display: block;
+    font-size: 11px;
+    font-style: normal;
+    line-height: 1;
+    white-space: nowrap;
+    margin: -5px 0;
+  }
+  .mini-theme { margin-bottom: -14px; }
+
+  .theme-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+    transition: color 0.3s;
+  }
+  .theme-btn:hover { color: var(--fg); }
 
   /* 展开状态：悬停（或键盘聚焦）时出现，底色更实 */
   .rail-panel {

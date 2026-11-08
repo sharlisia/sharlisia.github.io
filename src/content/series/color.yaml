@@ -4,7 +4,6 @@ order: 5
 cover: 03
 backdrop: 03
 tint: "#9b45d9"
-theme: dark
 groups:
   - rows:
       - full: 03

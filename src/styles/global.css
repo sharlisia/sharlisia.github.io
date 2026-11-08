@@ -16,10 +16,14 @@
   --sans: 'Inter Tight Variable', -apple-system, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
 
   --header: 56px;
-  --rail: 0px; /* 左侧菜单平时收起、浮在照片上，内容不再给它预留宽度 */
+  --rail: 0px; /* 左侧收起的小菜单所占的窄条；照片从它右边开始，不重叠 */
   --gutter: clamp(16px, 3vw, 48px);
   --gap: clamp(8px, 1vw, 16px);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (min-width: 900px) {
+  :root { --rail: 72px; }
 }
 
 /* 深色：接近黑的深茄紫 */
