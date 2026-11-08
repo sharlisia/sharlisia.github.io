@@ -14,22 +14,39 @@ const albums = series.map((s, i) => ({
   num: pad(i + 1),
   photos: s.groups.flatMap((g) => g.rows.flatMap((r) => r.photos)), // 与页面上的照片顺序一致
 }));
+// 三种看法各自的小图标（14×14）
 const views = [
-  { id: 'album', label: 'Album' },
-  { id: 'grid', label: 'Grid' },
-  { id: 'gallery', label: 'Gallery' },
+  {
+    id: 'album',
+    label: 'Album',
+    // 编排：上面一张大图，下面两张小图
+    icon: '<rect x="0" y="0" width="14" height="7" rx="1"/><rect x="0" y="9" width="6" height="5" rx="1"/><rect x="8" y="9" width="6" height="5" rx="1"/>',
+  },
+  {
+    id: 'grid',
+    label: 'Grid',
+    // 瀑布流：三列，高低错落
+    icon: '<rect x="0" y="0" width="4" height="8" rx="0.8"/><rect x="0" y="10" width="4" height="4" rx="0.8"/><rect x="5" y="0" width="4" height="4" rx="0.8"/><rect x="5" y="6" width="4" height="8" rx="0.8"/><rect x="10" y="0" width="4" height="6" rx="0.8"/><rect x="10" y="8" width="4" height="6" rx="0.8"/>',
+  },
+  {
+    id: 'gallery',
+    label: 'Gallery',
+    // 画廊：一张大图 + 下面一排缩略图
+    icon: '<rect x="0" y="0" width="14" height="9.5" rx="1"/><rect x="0" y="11" width="4" height="3" rx="0.6"/><rect x="5" y="11" width="4" height="3" rx="0.6"/><rect x="10" y="11" width="4" height="3" rx="0.6"/>',
+  },
 ];
 const HERO_SIZES = '100vw';
 ---
 
 <Base section="photography">
   <nav class="rail" aria-label="Albums">
-    <!-- 收起时：一个视图小图标 + 每个相册一条短线 -->
+    <!-- 收起时：三个看法小图标 + 每个相册一条短线 -->
     <div class="rail-mini" aria-hidden="true">
-      <svg class="mini-icon" width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
-        <rect x="0" y="0" width="6" height="6" rx="1" /><rect x="8" y="0" width="6" height="6" rx="1" />
-        <rect x="0" y="8" width="6" height="6" rx="1" /><rect x="8" y="8" width="6" height="6" rx="1" />
-      </svg>
+      <span class="mini-views">
+        {views.map((v) => (
+          <svg class="vi" data-mini-view={v.id} width="14" height="14" viewBox="0 0 14 14" fill="currentColor" set:html={v.icon} />
+        ))}
+      </span>
       <span class="mini-lines">
         {albums.map((c) => <i data-mini={c.id}></i>)}
       </span>
@@ -39,7 +56,12 @@ const HERO_SIZES = '100vw';
     <div class="rail-part">
       <p class="muted rail-label">View</p>
       <div class="views" role="group" aria-label="View">
-        {views.map((v) => <button type="button" data-view-btn={v.id}>{v.label}</button>)}
+        {views.map((v) => (
+          <button type="button" data-view-btn={v.id}>
+            <svg class="vi" width="12" height="12" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true" set:html={v.icon} />
+            {v.label}
+          </button>
+        ))}
       </div>
     </div>
     <div class="rail-part" data-dock>
@@ -285,6 +307,7 @@ const HERO_SIZES = '100vw';
     html.dataset.view = view;
     try { localStorage.setItem('view', view); } catch {}
     $$('[data-view-btn]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.viewBtn === view)));
+    $$('[data-mini-view]').forEach((s) => s.classList.toggle('active', s.dataset.miniView === view));
     figures.forEach((f) => {
       const img = f.querySelector('img')!;
       img.sizes = sizesFor[view](img);
@@ -405,7 +428,8 @@ const HERO_SIZES = '100vw';
 </script>
 
 <style>
-  .views { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+  .views { display: grid; gap: 8px; }
+  .views button { display: flex; align-items: center; gap: 8px; }
   .views button,
   .sheet-views button { color: var(--muted); transition: color 0.3s; }
   .views button:hover { color: var(--fg); }
@@ -427,25 +451,26 @@ const HERO_SIZES = '100vw';
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 16px;
+    gap: 34px;
     padding: 12px 10px;
-    border-radius: 4px;
     color: var(--muted);
-    background: color-mix(in srgb, var(--bg) 70%, transparent);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
-    transition: opacity 0.25s var(--ease) 0.15s, background-color 0.9s var(--ease);
+    /* 不要底色；只加一圈很淡的同底色光晕，压在照片上也看得清 */
+    filter: drop-shadow(0 0 1.5px var(--bg)) drop-shadow(0 0 4px color-mix(in srgb, var(--bg) 60%, transparent));
+    transition: opacity 0.25s var(--ease) 0.15s;
   }
-  .mini-lines { display: flex; flex-direction: column; gap: 7px; }
+  .mini-views { display: flex; flex-direction: column; gap: 12px; }
+  .vi { display: block; flex: none; transition: color 0.4s var(--ease); }
+  .mini-views .vi.active { color: var(--accent); }
+  .mini-lines { display: flex; flex-direction: column; gap: 15px; }
   .mini-lines i {
     display: block;
-    width: 12px;
+    width: 14px;
     height: 1.5px;
     border-radius: 1px;
     background: currentColor;
     transition: width 0.4s var(--ease), background-color 0.4s var(--ease);
   }
-  .mini-lines i.active { width: 20px; background: var(--accent); }
+  .mini-lines i.active { width: 24px; background: var(--accent); }
 
   /* 展开状态：悬停（或键盘聚焦）时出现，底色更实 */
   .rail-panel {
