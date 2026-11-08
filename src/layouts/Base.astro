@@ -114,7 +114,17 @@ const nav = [
     align-items: center;
     justify-content: space-between;
     padding: 0 var(--gutter);
+  }
+  /* 底色：上面实色，往下约 40px 渐变成透明，融入页面（用遮罩做渐变，切换深浅色时颜色仍能平滑过渡） */
+  .top::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 -40px 0;
+    z-index: -1;
+    pointer-events: none;
     background: var(--bg);
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 52%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0%, #000 52%, transparent 100%);
     transition: background-color 0.9s var(--ease);
   }
   .top-left { display: flex; align-items: center; }
