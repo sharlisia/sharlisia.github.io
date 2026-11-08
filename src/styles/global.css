@@ -1,5 +1,4 @@
-/* 全站无衬线：Tomorrow（细、方正、略带未来感）。200 = 导航，300 = 正文，500/600 = 标题 */
-@import '@fontsource/tomorrow/200.css';
+/* 全站无衬线：Tomorrow（细、方正、略带未来感）。300 = 导航和正文，500/600 = 标题 */
 @import '@fontsource/tomorrow/300.css';
 @import '@fontsource/tomorrow/500.css';
 @import '@fontsource/tomorrow/600.css';
@@ -16,6 +15,9 @@
   --ph: #ebe8f4;
   --accent: #3f2d8c;
   --accent-soft: rgba(63, 45, 140, 0.14);
+
+  /* 未选中但需要看清的文字（导航、菜单）：比 --muted 亮，比正文淡 */
+  --soft: color-mix(in srgb, var(--fg) 66%, var(--bg));
 
   --sans: 'Tomorrow', -apple-system, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
 
