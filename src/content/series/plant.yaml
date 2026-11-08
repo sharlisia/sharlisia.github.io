@@ -1,5 +1,6 @@
-title: Plant
-order: 5
+title: Canopy
+zh: 林
+order: 2
 cover: 03
 hidden: [11, 19]
 groups:

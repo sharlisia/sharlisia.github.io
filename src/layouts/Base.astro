@@ -1,105 +1,130 @@
 ---
-import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
 import { site } from '../site.config';
 
 interface Props {
   title?: string;
-  theme?: 'light' | 'dark';
-  overlayHeader?: boolean;
+  section: 'photography' | 'media-art' | 'graphic-design';
 }
-const { title, theme = 'light', overlayHeader = false } = Astro.props;
+const { title, section } = Astro.props;
 const base = import.meta.env.BASE_URL;
-const pageTitle = title ? `${title} — ${site.name}` : site.name;
-const path = Astro.url.pathname;
+const nav = [
+  { id: 'photography', label: 'Photography', href: base },
+  { id: 'media-art', label: 'Media Art', href: `${base}media-art/` },
+  { id: 'graphic-design', label: 'Graphic Design', href: `${base}graphic-design/` },
+] as const;
 ---
 
 <!doctype html>
-<html lang="en" data-theme={theme}>
+<html lang="en" data-theme="light" data-view="album">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{pageTitle}</title>
+    <title>{title ? `${title} — ${site.name}` : site.name}</title>
     <meta name="description" content={site.description} />
     <link rel="icon" href={`${base}favicon.svg`} type="image/svg+xml" />
-    <script is:inline>document.documentElement.classList.add('js');</script>
-    <ClientRouter fallback="swap" />
+    <script is:inline>
+      document.documentElement.classList.add('js');
+      try {
+        var v = new URLSearchParams(location.search).get('view') || localStorage.getItem('view');
+        if (v === 'album' || v === 'grid' || v === 'single') document.documentElement.dataset.view = v;
+      } catch (e) {}
+    </script>
   </head>
   <body>
-    <header class:list={['site-header', { overlay: overlayHeader }]}>
-      <a href={base} class="brand">{site.name}</a>
-      <nav class="label">
-        <a href={`${base}photography/`} class:list={{ active: path.includes('/photography') }}>Photography</a>
-      </nav>
+    <header class="top">
+      <div class="top-left">
+        <a href={base} class="mark">{site.name}</a>
+        <nav class="sections" aria-label="Sections">
+          {nav.map((n) => <a href={n.href} aria-current={n.id === section ? 'page' : undefined}>{n.label}</a>)}
+        </nav>
+      </div>
+      <div class="top-right">
+        <slot name="tools" />
+        <button type="button" class="menu-btn" data-menu-open>Menu</button>
+      </div>
     </header>
 
-    <main>
-      <slot />
-    </main>
+    <slot />
 
-    <footer class="site-footer label">
-      <span>© {new Date().getFullYear()} {site.name}</span>
-      {site.email && <a href={`mailto:${site.email}`}>{site.email}</a>}
-    </footer>
+    <!-- 手机菜单 -->
+    <div class="sheet" data-sheet hidden>
+      <button type="button" class="sheet-close" data-menu-close>Close</button>
+      <nav class="sheet-sections">
+        {nav.map((n) => <a href={n.href} aria-current={n.id === section ? 'page' : undefined}>{n.label}</a>)}
+      </nav>
+      <slot name="sheet" />
+    </div>
 
     <script>
-      function initReveal() {
-        const els = document.querySelectorAll('.reveal:not(.in)');
-        if (!('IntersectionObserver' in window)) {
-          els.forEach((el) => el.classList.add('in'));
-          return;
-        }
-        const io = new IntersectionObserver(
-          (entries) => {
-            for (const e of entries) {
-              if (e.isIntersecting) {
-                e.target.classList.add('in');
-                io.unobserve(e.target);
-              }
-            }
-          },
-          { rootMargin: '0px 0px -8% 0px' },
-        );
-        els.forEach((el) => io.observe(el));
-      }
-      document.addEventListener('astro:page-load', initReveal);
+      const html = document.documentElement;
+      const sheet = document.querySelector<HTMLElement>('[data-sheet]')!;
+      const close = () => { sheet.hidden = true; html.classList.remove('lock'); };
+      document.querySelector('[data-menu-open]')!.addEventListener('click', () => { sheet.hidden = false; html.classList.add('lock'); });
+      document.querySelector('[data-menu-close]')!.addEventListener('click', close);
+      sheet.addEventListener('click', (e) => { if ((e.target as HTMLElement).closest('a, [data-close-sheet]')) close(); });
+      addEventListener('keydown', (e) => { if (e.key === 'Escape' && !sheet.hidden) close(); });
     </script>
   </body>
 </html>
 
 <style>
-  .site-header {
+  .top {
     position: fixed;
     inset: 0 0 auto 0;
-    z-index: 50;
+    z-index: 40;
+    height: var(--header);
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    align-items: baseline;
-    padding: 22px var(--gutter);
-    color: #fff;
-    mix-blend-mode: difference;
-    pointer-events: none;
+    padding: 0 var(--gutter);
+    background: var(--bg);
+    transition: background-color 0.9s var(--ease);
   }
-  .site-header a { pointer-events: auto; }
-  .brand {
-    font-family: var(--serif);
-    font-style: italic;
-    font-size: 24px;
-    font-weight: 400;
+  .top-left { display: flex; align-items: center; }
+  .mark {
+    font-weight: 600;
     letter-spacing: 0.01em;
+    width: calc(var(--rail) - var(--gutter));
   }
-  nav a {
-    opacity: 0.7;
-    transition: opacity 0.3s;
-  }
-  nav a:hover,
-  nav a.active { opacity: 1; }
-
-  .site-footer {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 64px var(--gutter) 32px;
+  .sections { display: flex; gap: 22px; }
+  .sections a,
+  .sheet-sections a {
     color: var(--muted);
+    transition: color 0.3s;
   }
+  .sections a:hover,
+  .sections a[aria-current='page'],
+  .sheet-sections a[aria-current='page'] { color: var(--fg); }
+  .top-right { display: flex; align-items: center; gap: 24px; }
+  .menu-btn { display: none; }
+
+  @media (max-width: 899px) {
+    .mark { width: auto; }
+    .sections { display: none; }
+    .menu-btn { display: block; }
+  }
+
+  .sheet {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    background: var(--bg);
+    padding: calc(var(--header) + 4vh) var(--gutter) 32px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .sheet[hidden] { display: none; }
+  .sheet-close { position: absolute; top: 0; right: var(--gutter); height: var(--header); }
+  .sheet-sections {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 40px;
+    font-size: 26px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+
+  :global(html.lock) { overflow: hidden; }
 </style>

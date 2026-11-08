@@ -1,99 +1,371 @@
 ---
+import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
-import Photo from '../components/Photo.astro';
-import SeriesIndex from '../components/SeriesIndex.astro';
-import { getSeries, resolve } from '../lib/photos';
+import SeriesBody from '../components/SeriesBody.astro';
+import { getSeries } from '../lib/photos';
 import { site } from '../site.config';
 
 const series = await getSeries();
-const heroes = site.hero.map((id) => resolve(id, ''));
+const pad = (n: number) => String(n).padStart(2, '0');
+const anchor = (title: string) => title.toLowerCase().replace(/\s+/g, '-');
+// 编号：系列不编号，随拍按 01、02… 编
+let k = 0;
+const chapters = series.map((s) => ({ ...s, id: anchor(s.title), num: s.part === 'series' ? 'Series' : pad(++k) }));
+const parts = [
+  { label: 'Series', items: chapters.filter((c) => c.part === 'series') },
+  { label: 'Notes', items: chapters.filter((c) => c.part === 'notes') },
+].filter((p) => p.items.length);
+const views = [
+  { id: 'album', label: 'Album' },
+  { id: 'grid', label: 'Grid' },
+  { id: 'single', label: 'Single' },
+];
 ---
 
-<Base overlayHeader>
-  <section class="hero" data-hero>
-    {heroes.map((p, i) => (
-      <Photo photo={p} sizes="100vw" eager={i === 0} class:list={['hero-img', { on: i === 0 }]} />
-    ))}
-    <div class="hero-text">
-      <h1 class="display">{site.name}</h1>
-      <p class="label">{series.length} series — {series.reduce((n, s) => n + s.count, 0)} photographs</p>
-    </div>
-  </section>
+<Base section="photography">
+  <div class="views" role="group" aria-label="View" slot="tools">
+    {views.map((v) => <button type="button" data-view-btn={v.id}>{v.label}</button>)}
+    <span class="sep" aria-hidden="true"></span>
+    <button type="button" data-play>Play</button>
+  </div>
 
-  <section class="works">
-    <SeriesIndex series={series} />
-  </section>
+  <nav class="rail" aria-label="Chapters" data-rail-nav>
+    {parts.map((p) => (
+      <div class="rail-part">
+        <p class="muted rail-label">{p.label}</p>
+        <ol>
+          {p.items.map((c) => (
+            <li>
+              <a href={`#${c.id}`} data-rail={c.id} class="ri">
+                <span class="thumb" aria-hidden="true">
+                  <Image src={c.cover.src} alt="" width={240} format="webp" quality={72} loading="lazy" />
+                </span>
+                <span class="t">{c.title}</span>
+                <span class="zh">{c.zh}</span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </div>
+    ))}
+  </nav>
+
+  <main id="top">
+    <section class="intro" data-theme-zone="light">
+      <h1>{site.album}</h1>
+      <p class="muted">{site.albumZh}</p>
+    </section>
+
+    {chapters.map((c) => (
+      <section class="ch" id={c.id} data-theme-zone={c.theme} data-title={c.title} data-zh={c.zh ?? ''}>
+        <header class="ch-head">
+          <span class="muted">{c.num}</span>
+          <h2>{c.title}</h2>
+          <span class="muted">{c.zh}</span>
+          {c.place && <span class="muted place">{c.place}</span>}
+        </header>
+        <SeriesBody groups={c.groups} />
+      </section>
+    ))}
+
+    <footer class="foot muted">
+      <span>© {new Date().getFullYear()} {site.name}</span>
+      {site.email && <a href={`mailto:${site.email}`}>{site.email}</a>}
+    </footer>
+  </main>
+
+  <div slot="sheet" class="sheet-photo">
+    {parts.map((p) => (
+      <div class="sheet-part">
+        <p class="muted">{p.label}</p>
+        <ol>
+          {p.items.map((c) => (
+            <li><a href={`#${c.id}`}>{c.title} <span class="muted">{c.zh}</span></a></li>
+          ))}
+        </ol>
+      </div>
+    ))}
+    <div class="sheet-views">
+      {views.map((v) => <button type="button" data-view-btn={v.id} data-close-sheet>{v.label}</button>)}
+      <button type="button" data-play data-close-sheet>Play</button>
+    </div>
+  </div>
+
+  <!-- 全屏轮播 -->
+  <div class="show" data-show hidden>
+    <div class="show-stage" data-stage>
+      <img alt="" data-a />
+      <img alt="" data-b />
+    </div>
+    <div class="show-bar">
+      <span data-cap></span>
+      <span class="show-ctrl">
+        <button type="button" data-prev>Prev</button>
+        <button type="button" data-toggle>Pause</button>
+        <button type="button" data-next>Next</button>
+        <button type="button" data-close>Close</button>
+      </span>
+    </div>
+  </div>
 </Base>
 
 <script>
-  function initHero() {
-    const hero = document.querySelector('[data-hero]');
-    if (!hero || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const imgs = [...hero.querySelectorAll('.hero-img')];
-    if (imgs.length < 2) return;
-    let i = 0;
-    const t = setInterval(() => {
-      if (!document.body.contains(hero)) return clearInterval(t);
-      imgs[i].classList.remove('on');
-      i = (i + 1) % imgs.length;
-      imgs[i].classList.add('on');
-    }, 6000);
+  const html = document.documentElement;
+  const $ = <T extends Element = HTMLElement>(s: string, el: ParentNode = document) => el.querySelector<T>(s)!;
+  const $$ = <T extends Element = HTMLElement>(s: string, el: ParentNode = document) => [...el.querySelectorAll<T>(s)];
+  const figures = $$<HTMLElement>('.ch .ph');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const pad2 = (n: number) => String(n).padStart(2, '0');
+
+  /* ── 淡入 ── */
+  const revealIO = new IntersectionObserver(
+    (es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); revealIO.unobserve(e.target); } }),
+    { rootMargin: '0px 0px -6% 0px' },
+  );
+
+  /* ── 视图切换 ── */
+  const sizesFor: Record<string, (img: HTMLImageElement, r: number) => string> = {
+    album: (img) => img.dataset.sizes || '100vw',
+    grid: () => '(max-width: 640px) 50vw, 22vw',
+    single: (_, r) => `(max-width: 640px) 100vw, min(80vw, ${Math.round(76 * r)}vh)`,
+  };
+  function setView(view: string, keepPlace = true) {
+    if (!(view in sizesFor)) return;
+    const mid = innerHeight / 2;
+    const anchorFig = keepPlace
+      ? figures.find((f) => { const b = f.getBoundingClientRect(); return b.bottom > mid * 0.6 && b.top < innerHeight; })
+      : undefined;
+    html.dataset.view = view;
+    try { localStorage.setItem('view', view); } catch {}
+    $$('[data-view-btn]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.viewBtn === view)));
+    figures.forEach((f) => {
+      const img = f.querySelector('img')!;
+      img.sizes = sizesFor[view](img, parseFloat(f.dataset.r || '1'));
+      if (keepPlace) f.classList.add('in');
+    });
+    if (anchorFig) {
+      const b = anchorFig.getBoundingClientRect();
+      scrollTo({ top: scrollY + b.top + b.height / 2 - innerHeight / 2, behavior: 'instant' });
+    }
   }
-  document.addEventListener('astro:page-load', initHero);
+  $$('[data-view-btn]').forEach((b) => b.addEventListener('click', () => setView(b.dataset.viewBtn!)));
+  setView(html.dataset.view || 'album', false);
+  $$('.reveal').forEach((el) => revealIO.observe(el));
+
+  /* ── 当前章节：目录高亮 + 深色章节自动切换背景 ── */
+  let current: HTMLElement | null = null;
+  const spy = new IntersectionObserver(
+    (es) => {
+      for (const e of es) {
+        if (!e.isIntersecting) continue;
+        const el = e.target as HTMLElement;
+        html.dataset.theme = el.dataset.themeZone;
+        current = el.classList.contains('ch') ? el : null;
+        $$('[data-rail]').forEach((a) => a.classList.toggle('active', !!current && a.dataset.rail === current.id));
+      }
+    },
+    { rootMargin: '-50% 0px -50% 0px' },
+  );
+  $$('[data-theme-zone]').forEach((z) => spy.observe(z));
+
+  /* ── 目录 Dock 效果：悬停时封面抽出，离鼠标越近放得越大 ── */
+  const rail = $('[data-rail-nav]');
+  const items = $$('.ri', rail);
+  let centers: number[] = [];
+  rail.addEventListener('mouseenter', () => {
+    centers = items.map((it) => { const b = it.getBoundingClientRect(); return b.top + b.height / 2; });
+    rail.classList.add('open');
+  });
+  rail.addEventListener('mousemove', (e) => {
+    if (reduce) return;
+    items.forEach((it, i) => {
+      const t = Math.max(0, 1 - Math.abs(e.clientY - centers[i]) / 110);
+      it.style.setProperty('--s', (1 + 1.6 * t * t * (3 - 2 * t)).toFixed(3)); // smoothstep 衰减
+    });
+  });
+  rail.addEventListener('mouseleave', () => {
+    rail.classList.remove('open');
+    items.forEach((it) => it.style.removeProperty('--s'));
+  });
+
+  /* ── 全屏轮播 ── */
+  const show = $('[data-show]');
+  const imgs = [$<HTMLImageElement>('[data-a]', show), $<HTMLImageElement>('[data-b]', show)];
+  const cap = $('[data-cap]', show);
+  const toggle = $<HTMLButtonElement>('[data-toggle]', show);
+  let idx = 0, front = 0, timer = 0, playing = true;
+
+  const srcImg = (f: HTMLElement) => f.querySelector('img')!;
+  function display(i: number) {
+    idx = (i + figures.length) % figures.length;
+    const src = srcImg(figures[idx]);
+    const back = imgs[1 - front];
+    back.sizes = '100vw';
+    back.srcset = src.srcset;
+    back.src = src.src;
+    const swap = () => { back.classList.add('on'); imgs[front].classList.remove('on'); front = 1 - front; };
+    back.decode().then(swap, swap);
+    const ch = figures[idx].closest<HTMLElement>('.ch')!;
+    const inCh = $$('.ph', ch);
+    cap.textContent = `${ch.dataset.title} ${ch.dataset.zh}  —  ${pad2(inCh.indexOf(figures[idx]) + 1)} / ${pad2(inCh.length)}`;
+    const pre = new Image(); pre.sizes = '100vw'; pre.srcset = srcImg(figures[(idx + 1) % figures.length]).srcset;
+  }
+  function schedule() { clearInterval(timer); if (playing) timer = window.setInterval(() => display(idx + 1), 5000); }
+  function setPlaying(p: boolean) { playing = p; toggle.textContent = p ? 'Pause' : 'Play'; schedule(); }
+  function openShow() {
+    const vis = figures.find((f) => { const b = f.getBoundingClientRect(); return b.top >= 0 && b.top < innerHeight; });
+    const start = vis ?? (current ? $('.ph', current) : figures[0]);
+    show.hidden = false; html.classList.add('lock');
+    imgs.forEach((im) => im.classList.remove('on'));
+    display(figures.indexOf(start));
+    setPlaying(!reduce);
+  }
+  function closeShow() {
+    show.hidden = true; html.classList.remove('lock'); clearInterval(timer);
+    const b = figures[idx].getBoundingClientRect();
+    scrollTo({ top: scrollY + b.top + b.height / 2 - innerHeight / 2, behavior: 'instant' });
+  }
+  $$('[data-play]').forEach((b) => b.addEventListener('click', openShow));
+  $('[data-close]', show).addEventListener('click', closeShow);
+  $('[data-prev]', show).addEventListener('click', () => { display(idx - 1); schedule(); });
+  $('[data-next]', show).addEventListener('click', () => { display(idx + 1); schedule(); });
+  toggle.addEventListener('click', () => setPlaying(!playing));
+  $('[data-stage]', show).addEventListener('click', (e) => { display((e as MouseEvent).clientX < innerWidth / 2 ? idx - 1 : idx + 1); schedule(); });
+  addEventListener('keydown', (e) => {
+    if (show.hidden) return;
+    if (e.key === 'Escape') closeShow();
+    else if (e.key === 'ArrowRight') { display(idx + 1); schedule(); }
+    else if (e.key === 'ArrowLeft') { display(idx - 1); schedule(); }
+    else if (e.key === ' ') { e.preventDefault(); setPlaying(!playing); }
+  });
 </script>
 
 <style>
-  .hero {
-    position: relative;
-    height: 100svh;
-    overflow: hidden;
-    background: #0d0d0d;
-    color: #fff;
-  }
-  .hero :global(.hero-img) {
-    position: absolute;
-    inset: 0;
-    aspect-ratio: auto;
-    background: transparent;
-    opacity: 0;
-    transition: opacity 2.4s var(--ease);
-  }
-  .hero :global(.hero-img img) {
-    transform: scale(1.06);
-    transition: transform 9s linear;
-  }
-  .hero :global(.hero-img.on) { opacity: 1; }
-  .hero :global(.hero-img.on img) { transform: scale(1); }
+  .views { display: flex; align-items: center; gap: 18px; }
+  .views button,
+  .sheet-views button { color: var(--muted); transition: color 0.3s; }
+  .views button:hover,
+  .views button[aria-pressed='true'],
+  .sheet-views button[aria-pressed='true'] { color: var(--fg); }
+  .sep { width: 1px; height: 12px; background: var(--line); }
 
-  .hero::after {
-    content: '';
-    position: absolute;
-    inset: 55% 0 0 0;
-    background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.38));
-    pointer-events: none;
-  }
-  .hero-text {
-    position: absolute;
-    z-index: 1;
+  /* ── 左侧目录 ── */
+  .rail {
+    position: fixed;
+    z-index: 30;
+    top: calc(var(--header) + 22vh);
     left: var(--gutter);
-    right: var(--gutter);
-    bottom: clamp(24px, 5vh, 56px);
+    width: calc(var(--rail) - var(--gutter) - 16px);
+  }
+  .rail-part + .rail-part { margin-top: 28px; }
+  .rail-label { margin: 0 0 10px; font-size: 11px; letter-spacing: 0.04em; }
+  .rail ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  .ri {
+    --s: 1;
     display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    gap: 16px;
+    align-items: center;
+    gap: 0;
+    min-height: 22px;
+    color: var(--muted);
+    transition: color 0.4s var(--ease), gap 0.35s var(--ease);
   }
-  .hero-text h1 {
-    margin: 0;
-    font-size: clamp(64px, 14vw, 240px);
-    font-style: italic;
-    margin-bottom: -0.12em;
-  }
-  .hero-text p { margin: 0; opacity: 0.85; }
+  .ri .t { flex: 1; }
+  .ri:hover,
+  .ri.active { color: var(--fg); }
 
-  .works { padding: clamp(96px, 18vh, 200px) 0 0; }
+  /* 封面：平时收起，悬停目录时抽出，并按 --s 放大 */
+  .thumb {
+    flex: none;
+    width: 0;
+    height: 22px;
+    overflow: hidden;
+    border-radius: 2px;
+    opacity: 0;
+    transition: width 0.25s var(--ease), height 0.25s var(--ease), opacity 0.3s var(--ease);
+  }
+  .thumb :global(img) { width: 100%; height: 100%; object-fit: cover; }
+  .rail.open .ri { gap: 10px; }
+  .rail.open .thumb {
+    opacity: 1;
+    width: calc(30px * var(--s));
+    height: calc(22px * var(--s));
+  }
+  .rail.open .ri:hover .thumb { box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18); }
+
+  main { padding-left: var(--rail); }
+
+  /* ── 开头 ── */
+  .intro { padding: calc(var(--header) + 22vh) var(--gutter) 16vh; }
+  h1 {
+    margin: 0 0 10px;
+    font-size: clamp(34px, 4.4vw, 64px);
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    line-height: 1;
+  }
+  .intro p { margin: 0; }
+
+  /* ── 章节 ── */
+  .ch { padding-top: clamp(100px, 20vh, 240px); }
+  .ch:first-of-type { padding-top: 0; }
+  .ch-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin: 0 var(--gutter) clamp(28px, 5vh, 56px);
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+    transition: border-color 0.9s var(--ease);
+  }
+  .ch-head h2 { margin: 0; font-size: 13px; font-weight: 600; }
+  .place { margin-left: auto; }
+
+  .foot { display: flex; justify-content: space-between; gap: 16px; padding: 20vh var(--gutter) 28px; }
+
+  @media (max-width: 899px) {
+    .rail,
+    .views { display: none; }
+    .intro { padding-top: calc(var(--header) + 14vh); padding-bottom: 10vh; }
+  }
+
+  /* 手机菜单里的章节和视图 */
+  .sheet-photo { display: flex; flex-direction: column; flex: 1; }
+  .sheet-part + .sheet-part { margin-top: 28px; }
+  .sheet-part > p { margin: 0 0 10px; }
+  .sheet-part ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: 18px; font-weight: 500; }
+  .sheet-part ol .muted { font-size: 13px; font-weight: 400; }
+  .sheet-views { margin-top: auto; padding-top: 32px; display: flex; gap: 22px; }
+
+  /* ── 全屏轮播 ── */
+  .show { position: fixed; inset: 0; z-index: 80; background: #000; color: #e8e8e4; }
+  .show[hidden] { display: none; }
+  .show-stage { position: absolute; inset: 0 0 56px 0; cursor: pointer; }
+  .show-stage img {
+    position: absolute;
+    inset: 4vh 4vw;
+    width: calc(100% - 8vw);
+    height: calc(100% - 8vh);
+    object-fit: contain;
+    opacity: 0;
+    transition: opacity 1.2s var(--ease);
+  }
+  .show-stage img.on { opacity: 1; }
+  .show-bar {
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--gutter);
+    white-space: pre;
+  }
+  .show-ctrl { display: flex; gap: 20px; }
+  .show-ctrl button { color: #8a8a86; transition: color 0.3s; }
+  .show-ctrl button:hover { color: #fff; }
 
   @media (prefers-reduced-motion: reduce) {
-    .hero :global(.hero-img img) { transform: none; transition: none; }
+    .show-stage img,
+    .thumb { transition: none; }
   }
 </style>
