@@ -94,6 +94,25 @@ const nav = [
       });
       syncTheme();
 
+      // 顶栏：往下滑收起，往上滑出现；在页面最上方时始终显示
+      const top = document.querySelector<HTMLElement>('.top')!;
+      let lastY = scrollY;
+      let ticking = false;
+      addEventListener('scroll', () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+          ticking = false;
+          const y = scrollY;
+          const dy = y - lastY;
+          if (Math.abs(dy) < 6) return; // 忽略很小的抖动
+          if (html.classList.contains('lock')) { lastY = y; return; } // 菜单 / 弹窗打开时不动
+          top.classList.toggle('hide', dy > 0 && y > top.offsetHeight);
+          lastY = y;
+        });
+      }, { passive: true });
+      top.addEventListener('focusin', () => top.classList.remove('hide'));
+
       const sheet = document.querySelector<HTMLElement>('[data-sheet]')!;
       const close = () => { sheet.hidden = true; html.classList.remove('lock'); };
       document.querySelector('[data-menu-open]')!.addEventListener('click', () => { sheet.hidden = false; html.classList.add('lock'); });
@@ -114,20 +133,15 @@ const nav = [
     align-items: center;
     justify-content: space-between;
     padding: 0 var(--gutter);
+    /* 半透明 + 毛玻璃：贴着顶部满宽，隐约透出下面的照片；下沿一条极细的线 */
+    background: color-mix(in srgb, var(--bg) 58%, transparent);
+    -webkit-backdrop-filter: blur(16px) saturate(1.2);
+    backdrop-filter: blur(16px) saturate(1.2);
+    border-bottom: 1px solid var(--line);
+    transition: transform 0.45s var(--ease), background-color 0.9s var(--ease), border-color 0.9s var(--ease);
   }
-  /* 底色：上面约 45% 实色，往下按缓动曲线渐变到完全透明（下沿多延伸 22px），末端无硬边。
-     用遮罩做渐变，切换深浅色时颜色仍能平滑过渡 */
-  .top::before {
-    content: '';
-    position: absolute;
-    inset: 0 0 -22px 0;
-    z-index: -1;
-    pointer-events: none;
-    background: var(--bg);
-    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 45%, rgba(0,0,0,.86) 54%, rgba(0,0,0,.66) 63%, rgba(0,0,0,.44) 72%, rgba(0,0,0,.25) 81%, rgba(0,0,0,.11) 89%, rgba(0,0,0,.03) 95%, transparent 100%);
-    mask-image: linear-gradient(to bottom, #000 0%, #000 45%, rgba(0,0,0,.86) 54%, rgba(0,0,0,.66) 63%, rgba(0,0,0,.44) 72%, rgba(0,0,0,.25) 81%, rgba(0,0,0,.11) 89%, rgba(0,0,0,.03) 95%, transparent 100%);
-    transition: background-color 0.9s var(--ease);
-  }
+  /* 往下滑时收起，往上滑时出现（见下方脚本） */
+  .top.hide { transform: translateY(-100%); }
   .top-left { display: flex; align-items: center; }
   /* 签名 logo：WindSong 花体，只用在这里 */
   .mark {

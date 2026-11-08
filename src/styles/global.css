@@ -15,7 +15,7 @@
 
   --sans: 'Inter Tight Variable', -apple-system, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
 
-  --header: 68px;
+  --header: 56px;
   --rail: 0px; /* 左侧收起的小菜单所占的窄条；照片从它右边开始，不重叠 */
   --gutter: clamp(16px, 3vw, 48px);
   --gap: clamp(8px, 1vw, 16px);
