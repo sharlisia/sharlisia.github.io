@@ -65,11 +65,11 @@ const HERO_SIZES = '100vw';
     <!-- 悬停时展开 -->
     <div class="rail-panel">
     <div class="rail-part">
-      <p class="muted rail-label">View</p>
+      <!-- 与收起时的三个图标严格对齐：同样大小、同样行距、同样起点，展开只是在右边多出文字 -->
       <div class="views" role="group" aria-label="View">
         {views.map((v) => (
           <button type="button" data-view-btn={v.id}>
-            <svg class="vi" width="12" height="12" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true" set:html={v.icon} />
+            <svg class="vi" width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true" set:html={v.icon} />
             {v.label}
           </button>
         ))}
@@ -481,8 +481,9 @@ const HERO_SIZES = '100vw';
 </script>
 
 <style>
-  .views { display: grid; gap: 8px; }
-  .views button { display: flex; align-items: center; gap: 8px; }
+  /* 行高 14px + 间距 12px，与收起时的 .mini-views 完全一致 */
+  .views { display: grid; gap: 12px; }
+  .views button { display: flex; align-items: center; gap: 10px; height: 14px; line-height: 14px; }
   .views button,
   .sheet-views button { color: var(--muted); transition: color 0.3s; }
   .views button:hover { color: var(--fg); }
@@ -548,7 +549,7 @@ const HERO_SIZES = '100vw';
     top: 0;
     left: 0;
     width: 230px;
-    padding: 14px 18px 18px 12px;
+    padding: 12px 18px 18px 10px; /* 上、左与 .rail-mini 相同，看法图标展开前后不移位 */
     border-radius: 4px;
     background: color-mix(in srgb, var(--bg) 90%, transparent);
     -webkit-backdrop-filter: blur(18px);
@@ -556,15 +557,13 @@ const HERO_SIZES = '100vw';
     box-shadow: 0 12px 40px rgba(33, 24, 80, 0.1);
     opacity: 0;
     visibility: hidden;
-    transform: translateX(-6px);
-    transition: opacity 0.3s var(--ease) 0.15s, transform 0.3s var(--ease) 0.15s, visibility 0s linear 0.45s;
+    transition: opacity 0.3s var(--ease) 0.15s, visibility 0s linear 0.45s; /* 只淡入淡出，不平移，按钮位置不动 */
   }
   .rail:hover .rail-panel,
   .rail:focus-within .rail-panel {
     opacity: 1;
     visibility: visible;
-    transform: none;
-    transition: opacity 0.3s var(--ease) 0.06s, transform 0.3s var(--ease) 0.06s, visibility 0s;
+    transition: opacity 0.3s var(--ease) 0.06s, visibility 0s;
   }
   .rail:hover .rail-mini,
   .rail:focus-within .rail-mini { opacity: 0; transition-delay: 0s; }

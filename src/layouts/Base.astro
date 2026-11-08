@@ -115,7 +115,8 @@ const nav = [
     justify-content: space-between;
     padding: 0 var(--gutter);
   }
-  /* 底色：实色，只在最下沿约 14px 柔和地淡出，避免硬边（用遮罩做渐变，切换深浅色时颜色仍能平滑过渡） */
+  /* 底色：上面三分之一实色，从三分之一处往下渐变到透明（下沿多延伸 14px），避免硬边。
+     用遮罩做渐变，切换深浅色时颜色仍能平滑过渡 */
   .top::before {
     content: '';
     position: absolute;
@@ -123,8 +124,8 @@ const nav = [
     z-index: -1;
     pointer-events: none;
     background: var(--bg);
-    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 78%, transparent 100%);
-    mask-image: linear-gradient(to bottom, #000 0%, #000 78%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 33%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0%, #000 33%, transparent 100%);
     transition: background-color 0.9s var(--ease);
   }
   .top-left { display: flex; align-items: center; }
