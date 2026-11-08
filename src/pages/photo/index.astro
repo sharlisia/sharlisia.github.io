@@ -544,17 +544,22 @@ const HERO_SIZES = '100vw';
 
 
   /* 展开状态：悬停（或键盘聚焦）时出现，底色更实 */
+  /* 展开面板：毛玻璃 + 左右两条细浅边；上下不设边框，往上下拉长后自然渐隐 */
   .rail-panel {
+    --fade: 56px; /* 上下各拉长并渐隐的长度 */
     position: absolute;
-    top: 0;
+    top: calc(-1 * var(--fade));
     left: 0;
     width: 230px;
-    padding: 12px 18px 18px 10px; /* 上、左与 .rail-mini 相同，看法图标展开前后不移位 */
-    border-radius: 4px;
-    background: color-mix(in srgb, var(--bg) 90%, transparent);
-    -webkit-backdrop-filter: blur(18px);
-    backdrop-filter: blur(18px);
-    box-shadow: 0 12px 40px rgba(33, 24, 80, 0.1);
+    /* 内容起点：上 = 拉长量 + 12px、左 = 10px，与 .rail-mini 相同，看法图标展开前后不移位 */
+    padding: calc(var(--fade) + 12px) 18px calc(var(--fade) + 6px) 10px;
+    background: color-mix(in srgb, var(--bg) 58%, transparent);
+    -webkit-backdrop-filter: blur(16px) saturate(1.2);
+    backdrop-filter: blur(16px) saturate(1.2);
+    border-left: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
+    border-right: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 var(--fade), #000 calc(100% - var(--fade)), transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 var(--fade), #000 calc(100% - var(--fade)), transparent 100%);
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s var(--ease) 0.15s, visibility 0s linear 0.45s; /* 只淡入淡出，不平移，按钮位置不动 */

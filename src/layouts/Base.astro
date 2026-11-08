@@ -153,7 +153,14 @@ const nav = [
     margin-right: 56px;
     padding-top: 4px; /* 花体的视觉重心偏上，往下压一点与导航对齐 */
   }
-  .sections { display: flex; gap: 56px; }
+  /* 三个栏目放在顶栏正中间 */
+  .sections {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 56px;
+  }
   .sections a,
   .sheet-sections a {
     color: var(--muted);
