@@ -47,6 +47,13 @@ const nav = [
       </div>
       <div class="top-right">
         <slot name="tools" />
+        <!-- 深色 / 浅色切换：独立按钮，全站通用 -->
+        <button type="button" class="icon-btn" data-theme-toggle aria-label="Switch theme">
+          <svg width="17" height="17" viewBox="0 0 14 14" aria-hidden="true">
+            <circle cx="7" cy="7" r="6" fill="none" stroke="currentColor" stroke-width="1" />
+            <path d="M7 1a6 6 0 0 1 0 12z" fill="currentColor" />
+          </svg>
+        </button>
         {site.email && (
           <a href={`mailto:${site.email}`} class="mail" aria-label={`Email ${site.email}`} title={site.email}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
@@ -72,6 +79,21 @@ const nav = [
 
     <script>
       const html = document.documentElement;
+
+      // 深色 / 浅色切换：全站统一，记住访客的选择
+      const themeBtn = document.querySelector<HTMLButtonElement>('[data-theme-toggle]')!;
+      const syncTheme = () => {
+        const dark = html.dataset.theme === 'dark';
+        themeBtn.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+        themeBtn.title = dark ? 'Light mode' : 'Dark mode';
+      };
+      themeBtn.addEventListener('click', () => {
+        html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
+        try { localStorage.setItem('theme', html.dataset.theme); } catch {}
+        syncTheme();
+      });
+      syncTheme();
+
       const sheet = document.querySelector<HTMLElement>('[data-sheet]')!;
       const close = () => { sheet.hidden = true; html.classList.remove('lock'); };
       document.querySelector('[data-menu-open]')!.addEventListener('click', () => { sheet.hidden = false; html.classList.add('lock'); });
@@ -122,6 +144,14 @@ const nav = [
     transition: color 0.3s;
   }
   .mail:hover { color: var(--accent); }
+  .icon-btn {
+    display: flex;
+    color: var(--muted);
+    transition: color 0.3s;
+  }
+  .icon-btn:hover { color: var(--accent); }
+  .icon-btn svg { transition: transform 0.6s var(--ease); }
+  :global(html[data-theme='light']) .icon-btn svg { transform: rotate(180deg); }
   .menu-btn { display: none; }
 
   @media (max-width: 899px) {

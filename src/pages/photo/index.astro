@@ -24,8 +24,6 @@ const heroSlides = site.hero.map((ref) => {
 // 页脚：每次构建自动写入当月，如 11/2026
 const now = new Date();
 const lastUpdate = `${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
-// 深色 / 浅色切换图标：半实心圆
-const THEME_ICON = '<circle cx="7" cy="7" r="6" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M7 1a6 6 0 0 1 0 12z" fill="currentColor"/>';
 
 // 三种看法各自的小图标（14×14）
 const views = [
@@ -63,7 +61,6 @@ const HERO_SIZES = '100vw';
       <span class="mini-lines">
         {albums.map((c) => <i data-mini={c.id}><span>{c.title}</span></i>)}
       </span>
-      <svg class="vi mini-theme" width="14" height="14" viewBox="0 0 14 14" set:html={THEME_ICON} />
     </div>
     <!-- 悬停时展开 -->
     <div class="rail-panel">
@@ -93,13 +90,6 @@ const HERO_SIZES = '100vw';
           </li>
         ))}
       </ol>
-    </div>
-    <div class="rail-part">
-      <p class="muted rail-label">Mode</p>
-      <button type="button" class="theme-btn" data-theme-toggle>
-        <svg class="vi" width="12" height="12" viewBox="0 0 14 14" aria-hidden="true" set:html={THEME_ICON} />
-        <span data-theme-label>Light</span>
-      </button>
     </div>
     </div>
   </nav>
@@ -189,7 +179,6 @@ const HERO_SIZES = '100vw';
     </div>
     <div class="sheet-views">
       {views.map((v) => <button type="button" data-view-btn={v.id} data-close-sheet>{v.label}</button>)}
-      <button type="button" class="sheet-theme" data-theme-toggle><span data-theme-label>Light</span></button>
     </div>
   </div>
 
@@ -213,20 +202,6 @@ const HERO_SIZES = '100vw';
   };
 
   /* ── 当前相册：目录高亮 + 深色相册切换背景 ── */
-  /* ── 深色 / 浅色切换：全站统一，记住选择 ── */
-  function syncThemeUI() {
-    const dark = html.dataset.theme === 'dark';
-    // 按钮上写的是"点了会切到什么"
-    $$('[data-theme-label]').forEach((l) => { l.textContent = dark ? 'Light' : 'Dark'; });
-    $$('[data-theme-toggle]').forEach((b) => b.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode'));
-  }
-  $$('[data-theme-toggle]').forEach((b) => b.addEventListener('click', () => {
-    html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
-    try { localStorage.setItem('theme', html.dataset.theme); } catch {}
-    syncThemeUI();
-  }));
-  syncThemeUI();
-
   /* ── 当前相册：目录高亮 ── */
   let current: HTMLElement | null = null;
   function setCurrent(el: HTMLElement | null) {
@@ -566,14 +541,6 @@ const HERO_SIZES = '100vw';
   }
 
 
-  .theme-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--muted);
-    transition: color 0.3s;
-  }
-  .theme-btn:hover { color: var(--fg); }
 
   /* 展开状态：悬停（或键盘聚焦）时出现，底色更实 */
   .rail-panel {
