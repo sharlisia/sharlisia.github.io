@@ -131,94 +131,6 @@
     "original": "amber/微信图片_20261107102038_397_132.jpg",
     "sha1": "5bbe0adba1815bc5e12e4b3f39e4e55360b0c1a4"
   },
-  "canopy/canopy-00.jpg": {
-    "original": "canopy/IMG_20221022_162459_mh1666431857669.jpg",
-    "sha1": "d281612da0e3d159e9f4362ce578eec2625eeda9"
-  },
-  "canopy/canopy-01.jpg": {
-    "original": "canopy/微信图片_20261103150855_262_132.jpg",
-    "sha1": "ca19ede4515aaed5e1a7e010fca163d297650d57"
-  },
-  "canopy/canopy-02.jpg": {
-    "original": "canopy/微信图片_20261103150855_268_132.jpg",
-    "sha1": "830bebab5a1c43eca99f7ba5995349398aa2a126"
-  },
-  "canopy/canopy-03.jpg": {
-    "original": "canopy/微信图片_20261103150855_269_132.jpg",
-    "sha1": "2b507675187b5b307f02f4101209f6347e3475b0"
-  },
-  "canopy/canopy-04.jpg": {
-    "original": "canopy/微信图片_20261103150855_270_132.jpg",
-    "sha1": "8cbba1f9d6bf0cf07ce25e50d0cd07da7bae6aaf"
-  },
-  "canopy/canopy-05.jpg": {
-    "original": "canopy/微信图片_20261103150855_271_132.jpg",
-    "sha1": "78fa5a0d724ae7de9af069d02bc2fb80a8c98cba"
-  },
-  "canopy/canopy-06.jpg": {
-    "original": "canopy/微信图片_20261103150855_272_132.jpg",
-    "sha1": "471fb009006450be5ab0734254385753c1218c06"
-  },
-  "canopy/canopy-07.jpg": {
-    "original": "canopy/微信图片_20261103150855_273_132.jpg",
-    "sha1": "3bfe51b9d89a7194dfe9f51d3e0c176624f4ebd0"
-  },
-  "canopy/canopy-08.jpg": {
-    "original": "canopy/微信图片_20261107100526_325_132.jpg",
-    "sha1": "d5dd5ab7298a684f340f2d1f23fe0462024986fd"
-  },
-  "canopy/canopy-09.jpg": {
-    "original": "canopy/微信图片_20261107100526_327_132.jpg",
-    "sha1": "e45074122a2a914edd76a01410307eec0c63a939"
-  },
-  "canopy/canopy-10.jpg": {
-    "original": "canopy/微信图片_20261107100526_329_132.jpg",
-    "sha1": "9040dcf34972608dcc075b8480644410a0d62239"
-  },
-  "canopy/canopy-11.jpg": {
-    "original": "canopy/微信图片_20261107100526_330_132.jpg",
-    "sha1": "79556f338c7a29fd7b41e4419edb49e1e39ffe42"
-  },
-  "canopy/canopy-12.jpg": {
-    "original": "canopy/微信图片_20261107100526_331_132.jpg",
-    "sha1": "08c024d4a8c42be0e5d1f70e064e03655cd49cc1"
-  },
-  "canopy/canopy-13.jpg": {
-    "original": "canopy/微信图片_20261107100526_332_132.jpg",
-    "sha1": "735e7f039075459e3363b8fb472db71bd7c45e42"
-  },
-  "canopy/canopy-14.jpg": {
-    "original": "canopy/微信图片_20261107100526_333_132.jpg",
-    "sha1": "b7926851e0f3cf97bf527a6d56c04699e838ebce"
-  },
-  "canopy/canopy-15.jpg": {
-    "original": "canopy/微信图片_20261107100526_341_132.jpg",
-    "sha1": "1bb9cb46526dafa3254fa895f4ee65a169c7476b"
-  },
-  "canopy/canopy-16.jpg": {
-    "original": "canopy/微信图片_20261107100526_375_132.jpg",
-    "sha1": "ec6d3a54ff127b3b664af532b3b4c45da919637d"
-  },
-  "canopy/canopy-17.jpg": {
-    "original": "canopy/微信图片_20261107102038_404_132.jpg",
-    "sha1": "77ad27f2bec12ea64c02661432e4840ab04a76fd"
-  },
-  "canopy/canopy-18.jpg": {
-    "original": "canopy/微信图片_20261107102038_407_132.jpg",
-    "sha1": "818ec93366aeef40a0523fa7f35ba0e18198ebfe"
-  },
-  "canopy/canopy-19.jpg": {
-    "original": "canopy/微信图片_20261107102038_408_132.jpg",
-    "sha1": "1dab38e49a07ad8b4d5e7643d2429b585420854d"
-  },
-  "canopy/canopy-20.jpg": {
-    "original": "canopy/微信图片_20261107102038_409_132.jpg",
-    "sha1": "67b3ddae06a041c4c9627d08487f9e3b8d6cf6c9"
-  },
-  "canopy/canopy-21.jpg": {
-    "original": "canopy/微信图片_20261107102038_411_132.jpg",
-    "sha1": "aee16435ff9dd011381a7414bd06845cd1199e2d"
-  },
   "chroma/chroma-00.jpg": {
     "original": "chroma/IMG_20221031_172033_mh1667208478159.jpg",
     "sha1": "8d34e0a079b8ce841fab154f82bf25abc313b4d4"
@@ -318,6 +230,94 @@
   "eaves/eaves-16.jpg": {
     "original": "eaves/微信图片_20261107102038_400_132.jpg",
     "sha1": "4a6c8cd6e76fecde11b549b8f77fa5852b86391f"
+  },
+  "foliage/foliage-00.jpg": {
+    "original": "foliage/IMG_20221022_162459_mh1666431857669.jpg",
+    "sha1": "d281612da0e3d159e9f4362ce578eec2625eeda9"
+  },
+  "foliage/foliage-01.jpg": {
+    "original": "foliage/微信图片_20261103150855_262_132.jpg",
+    "sha1": "ca19ede4515aaed5e1a7e010fca163d297650d57"
+  },
+  "foliage/foliage-02.jpg": {
+    "original": "foliage/微信图片_20261103150855_268_132.jpg",
+    "sha1": "830bebab5a1c43eca99f7ba5995349398aa2a126"
+  },
+  "foliage/foliage-03.jpg": {
+    "original": "foliage/微信图片_20261103150855_269_132.jpg",
+    "sha1": "2b507675187b5b307f02f4101209f6347e3475b0"
+  },
+  "foliage/foliage-04.jpg": {
+    "original": "foliage/微信图片_20261103150855_270_132.jpg",
+    "sha1": "8cbba1f9d6bf0cf07ce25e50d0cd07da7bae6aaf"
+  },
+  "foliage/foliage-05.jpg": {
+    "original": "foliage/微信图片_20261103150855_271_132.jpg",
+    "sha1": "78fa5a0d724ae7de9af069d02bc2fb80a8c98cba"
+  },
+  "foliage/foliage-06.jpg": {
+    "original": "foliage/微信图片_20261103150855_272_132.jpg",
+    "sha1": "471fb009006450be5ab0734254385753c1218c06"
+  },
+  "foliage/foliage-07.jpg": {
+    "original": "foliage/微信图片_20261103150855_273_132.jpg",
+    "sha1": "3bfe51b9d89a7194dfe9f51d3e0c176624f4ebd0"
+  },
+  "foliage/foliage-08.jpg": {
+    "original": "foliage/微信图片_20261107100526_325_132.jpg",
+    "sha1": "d5dd5ab7298a684f340f2d1f23fe0462024986fd"
+  },
+  "foliage/foliage-09.jpg": {
+    "original": "foliage/微信图片_20261107100526_327_132.jpg",
+    "sha1": "e45074122a2a914edd76a01410307eec0c63a939"
+  },
+  "foliage/foliage-10.jpg": {
+    "original": "foliage/微信图片_20261107100526_329_132.jpg",
+    "sha1": "9040dcf34972608dcc075b8480644410a0d62239"
+  },
+  "foliage/foliage-11.jpg": {
+    "original": "foliage/微信图片_20261107100526_330_132.jpg",
+    "sha1": "79556f338c7a29fd7b41e4419edb49e1e39ffe42"
+  },
+  "foliage/foliage-12.jpg": {
+    "original": "foliage/微信图片_20261107100526_331_132.jpg",
+    "sha1": "08c024d4a8c42be0e5d1f70e064e03655cd49cc1"
+  },
+  "foliage/foliage-13.jpg": {
+    "original": "foliage/微信图片_20261107100526_332_132.jpg",
+    "sha1": "735e7f039075459e3363b8fb472db71bd7c45e42"
+  },
+  "foliage/foliage-14.jpg": {
+    "original": "foliage/微信图片_20261107100526_333_132.jpg",
+    "sha1": "b7926851e0f3cf97bf527a6d56c04699e838ebce"
+  },
+  "foliage/foliage-15.jpg": {
+    "original": "foliage/微信图片_20261107100526_341_132.jpg",
+    "sha1": "1bb9cb46526dafa3254fa895f4ee65a169c7476b"
+  },
+  "foliage/foliage-16.jpg": {
+    "original": "foliage/微信图片_20261107100526_375_132.jpg",
+    "sha1": "ec6d3a54ff127b3b664af532b3b4c45da919637d"
+  },
+  "foliage/foliage-17.jpg": {
+    "original": "foliage/微信图片_20261107102038_404_132.jpg",
+    "sha1": "77ad27f2bec12ea64c02661432e4840ab04a76fd"
+  },
+  "foliage/foliage-18.jpg": {
+    "original": "foliage/微信图片_20261107102038_407_132.jpg",
+    "sha1": "818ec93366aeef40a0523fa7f35ba0e18198ebfe"
+  },
+  "foliage/foliage-19.jpg": {
+    "original": "foliage/微信图片_20261107102038_408_132.jpg",
+    "sha1": "1dab38e49a07ad8b4d5e7643d2429b585420854d"
+  },
+  "foliage/foliage-20.jpg": {
+    "original": "foliage/微信图片_20261107102038_409_132.jpg",
+    "sha1": "67b3ddae06a041c4c9627d08487f9e3b8d6cf6c9"
+  },
+  "foliage/foliage-21.jpg": {
+    "original": "foliage/微信图片_20261107102038_411_132.jpg",
+    "sha1": "aee16435ff9dd011381a7414bd06845cd1199e2d"
   },
   "pale/pale-00.jpg": {
     "original": "pale/1708442306594.jpg",

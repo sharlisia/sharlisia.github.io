@@ -5,13 +5,13 @@
  * 文字是带紫调的近黑；未选中 = 灰紫，选中 / 当前 = 深紫。
  */
 :root {
-  --bg: #f7f5fb;
-  --fg: #1d1828;
-  --muted: #a49db4;
-  --line: rgba(62, 44, 104, 0.12);
-  --ph: #ece8f4;
-  --accent: #4a2d8c;
-  --accent-soft: rgba(74, 45, 140, 0.14);
+  --bg: #f6f5fb;
+  --fg: #1b1828;
+  --muted: #a19db4;
+  --line: rgba(55, 44, 104, 0.12);
+  --ph: #ebe8f4;
+  --accent: #3f2d8c;
+  --accent-soft: rgba(63, 45, 140, 0.14);
 
   --sans: 'Inter Tight Variable', -apple-system, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
 
@@ -28,13 +28,13 @@
 
 /* 深色：接近黑的深茄紫 */
 [data-theme='dark'] {
-  --bg: #110d18;
-  --fg: #efebf7;
-  --muted: #7e7593;
-  --line: rgba(239, 235, 247, 0.12);
-  --ph: #1d1826;
-  --accent: #c7b6f7;
-  --accent-soft: rgba(199, 182, 247, 0.22);
+  --bg: #100d18;
+  --fg: #eeebf7;
+  --muted: #7a7593;
+  --line: rgba(238, 235, 247, 0.12);
+  --ph: #1b1826;
+  --accent: #bfb6f7;
+  --accent-soft: rgba(191, 182, 247, 0.22);
 }
 
 *,

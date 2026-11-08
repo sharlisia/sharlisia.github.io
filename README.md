@@ -22,7 +22,7 @@ npm run deploy                                        # 构建并发布：主页
 
 ### 单独导入
 
-1. 把新照片放进某个文件夹的子文件夹里（子文件夹名 = 系列名，例如 `original/canopy/`）
+1. 把新照片放进某个文件夹的子文件夹里（子文件夹名 = 系列名，例如 `original/foliage/`）
 2. 运行：`npm run import-photos -- 新照片`
    - 自动复制到 `src/assets/photos/<系列>/`，按顺序编号
    - 自动生成网页版（长边 2400px），去掉全部 EXIF/GPS，跳过已导入过的照片
