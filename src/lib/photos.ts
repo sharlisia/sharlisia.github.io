@@ -6,7 +6,7 @@ const modules = import.meta.glob<{ default: ImageMetadata }>('/src/assets/photos
 });
 
 export interface Photo {
-  id: string; // 如 "building-08"
+  id: string; // 如 "eaves-08"
   folder: string;
   src: ImageMetadata;
   ratio: number; // 宽 / 高
@@ -18,7 +18,7 @@ for (const [path, mod] of Object.entries(modules)) {
   photos.set(file, { id: file, folder, src: mod.default, ratio: mod.default.width / mod.default.height });
 }
 
-/** "08" / 8 / "building-08" → Photo */
+/** "08" / 8 / "eaves-08" → Photo */
 export function resolve(ref: string | number, folder: string): Photo {
   const s = String(ref);
   const id = /^\d+$/.test(s) ? `${folder}-${s.padStart(2, '0')}` : s;

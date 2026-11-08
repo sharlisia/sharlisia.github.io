@@ -4,14 +4,13 @@ order: 2
 cover: 03
 backdrop: 00
 tint: "#3d8a52"
-hidden: [11, 19]
 groups:
   - rows:
       - full: 00
       - center: 03
       - row: [04, 09]
   - rows:
-      - row: [07, 10]
+      - row: [07, 10, 11]
       - center: 12
       - row: [06, 14, 13]
       - row: [05, 08]
@@ -21,4 +20,4 @@ groups:
       - left: 15
   - rows:
       - wide: 21
-      - wide: 20
+      - row: [19, 20]

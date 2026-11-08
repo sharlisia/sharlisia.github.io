@@ -4,12 +4,11 @@ order: 3
 cover: 06
 backdrop: 14
 tint: "#c27a2c"
-hidden: [04, 07, 17]
 groups:
   - rows:
       - full: 06
       - row: [08, 02]
-      - wide: 05
+      - stack: [04, 05, 07]
   - rows:
       - row: [10, 11]
       - full: 14
@@ -20,7 +19,7 @@ groups:
       - right: 15
   - rows:
       - center: 29
-      - row: [16, 18]
+      - row: [16, 17, 18]
       - row: [19, 20, 21]
       - row: [30, 31, 32]
       - wide: 09

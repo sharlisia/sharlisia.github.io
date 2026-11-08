@@ -4,7 +4,6 @@ order: 4
 cover: 04
 backdrop: 13
 tint: "#7f98ab"
-hidden: [36]
 groups:
   - rows:
       - stack: [04, 06]
@@ -22,7 +21,7 @@ groups:
       - center: 30
       - row: [31, 43]
       - row: [33, 34]
-      - row: [35, 37]
+      - row: [35, 36, 37]
       - row: [38, 39, 40]
       - row: [41, 25]
   - rows:

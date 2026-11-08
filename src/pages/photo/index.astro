@@ -2,7 +2,7 @@
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import SeriesBody from '../../components/SeriesBody.astro';
-import { getSeries } from '../../lib/photos';
+import { getSeries, resolve } from '../../lib/photos';
 import { site } from '../../site.config';
 
 const series = await getSeries();
@@ -14,6 +14,13 @@ const albums = series.map((s, i) => ({
   num: pad(i + 1),
   photos: s.groups.flatMap((g) => g.rows.flatMap((r) => r.photos)), // 与页面上的照片顺序一致
 }));
+// 头图精选：照片 + 它所在的相册（点击跳到该相册）
+const heroSlides = site.hero.map((ref) => {
+  const photo = resolve(ref, '');
+  const album = albums.find((a) => a.slug === photo.folder);
+  if (!album) throw new Error(`[hero] 照片 ${ref} 不属于任何相册`);
+  return { photo, album };
+});
 // 页脚：每次构建自动写入当月，如 11/2026
 const now = new Date();
 const lastUpdate = `${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
@@ -48,7 +55,6 @@ const HERO_SIZES = '100vw';
   <nav class="rail" aria-label="Albums">
     <!-- 收起时：三个看法小图标 + 每个相册一条短线 -->
     <div class="rail-mini" aria-hidden="true">
-      <svg class="vi mini-theme" width="14" height="14" viewBox="0 0 14 14" set:html={THEME_ICON} />
       <span class="mini-views">
         {views.map((v) => (
           <svg class="vi" data-mini-view={v.id} width="14" height="14" viewBox="0 0 14 14" fill="currentColor" set:html={v.icon} />
@@ -57,15 +63,10 @@ const HERO_SIZES = '100vw';
       <span class="mini-lines">
         {albums.map((c) => <i data-mini={c.id}><span>{c.title}</span></i>)}
       </span>
+      <svg class="vi mini-theme" width="14" height="14" viewBox="0 0 14 14" set:html={THEME_ICON} />
     </div>
     <!-- 悬停时展开 -->
     <div class="rail-panel">
-    <div class="rail-part">
-      <button type="button" class="theme-btn" data-theme-toggle>
-        <svg class="vi" width="12" height="12" viewBox="0 0 14 14" aria-hidden="true" set:html={THEME_ICON} />
-        <span data-theme-label>Light</span>
-      </button>
-    </div>
     <div class="rail-part">
       <p class="muted rail-label">View</p>
       <div class="views" role="group" aria-label="View">
@@ -93,6 +94,13 @@ const HERO_SIZES = '100vw';
         ))}
       </ol>
     </div>
+    <div class="rail-part">
+      <p class="muted rail-label">Mode</p>
+      <button type="button" class="theme-btn" data-theme-toggle>
+        <svg class="vi" width="12" height="12" viewBox="0 0 14 14" aria-hidden="true" set:html={THEME_ICON} />
+        <span data-theme-label>Light</span>
+      </button>
+    </div>
     </div>
   </nav>
 
@@ -116,14 +124,14 @@ const HERO_SIZES = '100vw';
   </div>
 
   <main id="top">
-    <!-- 头图：每个相册的封面轮播 -->
+    <!-- 头图：精选照片轮播（site.config.ts 里的 hero） -->
     <section class="hero" data-zone data-hero>
-      {albums.map((c, i) => (
-        <a href={`#${c.id}`} class:list={['hero-slide', { on: i === 0 }]} data-slide={i} tabindex="-1">
+      {heroSlides.map((h, i) => (
+        <a href={`#${h.album.id}`} class:list={['hero-slide', { on: i === 0 }]} data-slide={i} data-name={`${h.album.title} ${h.album.zh ?? ''}`} tabindex="-1">
           <Image
-            src={c.cover.src}
+            src={h.photo.src}
             alt=""
-            widths={[800, 1400, 2000].filter((w) => w <= c.cover.src.width)}
+            widths={[800, 1400, 2000].filter((w) => w <= h.photo.src.width)}
             sizes={HERO_SIZES}
             format="webp"
             quality={80}
@@ -133,10 +141,10 @@ const HERO_SIZES = '100vw';
         </a>
       ))}
       <div class="hero-index">
-        <span class="hero-now" data-hero-now>{albums[0].title} {albums[0].zh}</span>
+        <span class="hero-now" data-hero-now>{heroSlides[0].album.title} {heroSlides[0].album.zh}</span>
         <span class="hero-bars">
-          {albums.map((c, i) => (
-            <button type="button" class:list={['bar', { on: i === 0 }]} data-bar={i} aria-label={c.title}><i></i></button>
+          {heroSlides.map((h, i) => (
+            <button type="button" class:list={['bar', { on: i === 0 }]} data-bar={i} aria-label={h.album.title}><i></i></button>
           ))}
         </span>
       </div>
@@ -261,13 +269,12 @@ const HERO_SIZES = '100vw';
   const slides = $$('[data-slide]');
   const bars = $$('[data-bar]');
   const heroNow = $('[data-hero-now]');
-  const albumNames = $$<HTMLElement>('.ch').map((c) => `${c.dataset.title} ${c.dataset.zh}`);
   let hi = 0, heroTimer = 0;
   function heroGo(i: number) {
     hi = (i + slides.length) % slides.length;
     slides.forEach((s, k) => s.classList.toggle('on', k === hi));
     bars.forEach((b, k) => { b.classList.remove('on'); if (k === hi) { void b.offsetWidth; b.classList.add('on'); } });
-    heroNow.textContent = albumNames[hi];
+    heroNow.textContent = slides[hi].dataset.name || '';
     const next = slides[(hi + 1) % slides.length].querySelector('img');
     if (next) next.loading = 'eager';
   }
@@ -522,7 +529,7 @@ const HERO_SIZES = '100vw';
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 34px;
+    gap: 44px;
     padding: 12px 10px;
     color: var(--muted);
     /* 不要底色；只加一圈很淡的同底色光晕，压在照片上也看得清 */
@@ -557,7 +564,7 @@ const HERO_SIZES = '100vw';
     white-space: nowrap;
     margin: -5px 0;
   }
-  .mini-theme { margin-bottom: -14px; }
+
 
   .theme-btn {
     display: flex;
@@ -594,7 +601,7 @@ const HERO_SIZES = '100vw';
   }
   .rail:hover .rail-mini,
   .rail:focus-within .rail-mini { opacity: 0; transition-delay: 0s; }
-  .rail-part + .rail-part { margin-top: 32px; }
+  .rail-part + .rail-part { margin-top: 44px; }
   .rail-label { margin: 0 0 10px; font-size: 11px; letter-spacing: 0.04em; }
   .rail ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
   .ri {
