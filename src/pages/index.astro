@@ -8,53 +8,43 @@ import { site } from '../site.config';
 const series = await getSeries();
 const pad = (n: number) => String(n).padStart(2, '0');
 const anchor = (title: string) => title.toLowerCase().replace(/\s+/g, '-');
-// 编号：系列不编号，随拍按 01、02… 编
-let k = 0;
-const chapters = series.map((s) => ({
+const albums = series.map((s, i) => ({
   ...s,
   id: anchor(s.title),
-  num: s.part === 'series' ? 'Series' : pad(++k),
+  num: pad(i + 1),
   photos: s.groups.flatMap((g) => g.rows.flatMap((r) => r.photos)), // 与页面上的照片顺序一致
 }));
-const parts = [
-  { label: 'Series', items: chapters.filter((c) => c.part === 'series') },
-  { label: 'Notes', items: chapters.filter((c) => c.part === 'notes') },
-].filter((p) => p.items.length);
 const views = [
   { id: 'album', label: 'Album' },
   { id: 'grid', label: 'Grid' },
   { id: 'gallery', label: 'Gallery' },
 ];
+const HERO_SIZES = '(min-width: 900px) calc(100vw - 200px), 100vw';
 ---
 
 <Base section="photography">
-  <nav class="rail" aria-label="Chapters">
-    <div data-dock>
-    {parts.map((p) => (
-      <div class="rail-part">
-        <p class="muted rail-label">{p.label}</p>
-        <ol>
-          {p.items.map((c) => (
-            <li>
-              <a href={`#${c.id}`} data-rail={c.id} class="ri">
-                <span class="thumb" aria-hidden="true">
-                  <Image src={c.cover.src} alt="" width={240} format="webp" quality={72} loading="lazy" />
-                </span>
-                <span class="t">{c.title}</span>
-                <span class="zh">{c.zh}</span>
-              </a>
-            </li>
-          ))}
-        </ol>
-      </div>
-    ))}
-    </div>
+  <nav class="rail" aria-label="Albums">
     <div class="rail-part">
       <p class="muted rail-label">View</p>
       <div class="views" role="group" aria-label="View">
         {views.map((v) => <button type="button" data-view-btn={v.id}>{v.label}</button>)}
-        <button type="button" data-play>Play</button>
       </div>
+    </div>
+    <div class="rail-part" data-dock>
+      <p class="muted rail-label">Albums</p>
+      <ol>
+        {albums.map((c) => (
+          <li>
+            <a href={`#${c.id}`} data-rail={c.id} class="ri">
+              <span class="thumb" aria-hidden="true">
+                <Image src={c.cover.src} alt="" width={240} format="webp" quality={72} loading="lazy" />
+              </span>
+              <span class="t">{c.title}</span>
+              <span class="zh">{c.zh}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
     </div>
   </nav>
 
@@ -64,9 +54,9 @@ const views = [
       <img alt="" data-gal-img />
     </div>
     <p class="gal-cap muted" data-gal-cap></p>
-    <div class="gal-strip" data-gal-strip>
-      {chapters.map((c) => (
-        <div class="gal-ch" data-gal-ch={c.id}>
+    <div class="gal-strip">
+      {albums.map((c) => (
+        <div class="gal-ch">
           {c.photos.map((p) => (
             <button type="button" class="gal-th" aria-label={c.title}>
               <Image src={p.src} alt="" width={200} format="webp" quality={70} loading="lazy" />
@@ -78,12 +68,37 @@ const views = [
   </div>
 
   <main id="top">
-    <section class="intro" data-theme-zone="light">
-      <h1>{site.album}</h1>
-      <p class="muted">{site.albumZh}</p>
+    <!-- 头图：每个相册的封面轮播 -->
+    <section class="hero" data-theme-zone="light" data-hero>
+      {albums.map((c, i) => (
+        <a href={`#${c.id}`} class:list={['hero-slide', { on: i === 0 }]} data-slide={i} tabindex="-1">
+          <Image
+            src={c.cover.src}
+            alt=""
+            widths={[800, 1400, 2000].filter((w) => w <= c.cover.src.width)}
+            sizes={HERO_SIZES}
+            format="webp"
+            quality={80}
+            loading={i === 0 ? 'eager' : 'lazy'}
+            fetchpriority={i === 0 ? 'high' : 'auto'}
+          />
+        </a>
+      ))}
+      <div class="hero-text">
+        <h1>{site.album}</h1>
+        <p>{site.albumZh}</p>
+      </div>
+      <div class="hero-index">
+        <span class="hero-now" data-hero-now>{albums[0].title} {albums[0].zh}</span>
+        <span class="hero-bars">
+          {albums.map((c, i) => (
+            <button type="button" class:list={['bar', { on: i === 0 }]} data-bar={i} aria-label={c.title}><i></i></button>
+          ))}
+        </span>
+      </div>
     </section>
 
-    {chapters.map((c) => (
+    {albums.map((c) => (
       <section class="ch" id={c.id} data-theme-zone={c.theme} data-title={c.title} data-zh={c.zh ?? ''}>
         <header class="ch-head">
           <span class="muted">{c.num}</span>
@@ -102,42 +117,20 @@ const views = [
   </main>
 
   <div slot="sheet" class="sheet-photo">
-    {parts.map((p) => (
-      <div class="sheet-part">
-        <p class="muted">{p.label}</p>
-        <ol>
-          {p.items.map((c) => (
-            <li><a href={`#${c.id}`}>{c.title} <span class="muted">{c.zh}</span></a></li>
-          ))}
-        </ol>
-      </div>
-    ))}
+    <div class="sheet-part">
+      <p class="muted">Albums</p>
+      <ol>
+        {albums.map((c) => <li><a href={`#${c.id}`}>{c.title} <span class="muted">{c.zh}</span></a></li>)}
+      </ol>
+    </div>
     <div class="sheet-views">
       {views.map((v) => <button type="button" data-view-btn={v.id} data-close-sheet>{v.label}</button>)}
-      <button type="button" data-play data-close-sheet>Play</button>
     </div>
   </div>
 
-  <!-- 全屏轮播 -->
-  <div class="show" data-show hidden>
-    <div class="show-stage" data-stage>
-      <img alt="" data-a />
-      <img alt="" data-b />
-    </div>
-    <div class="show-bar">
-      <span class="show-left">
-        <span class="show-chs">
-          {chapters.map((c) => <button type="button" data-show-ch={c.id}>{c.title}</button>)}
-        </span>
-        <span class="show-count" data-cap></span>
-      </span>
-      <span class="show-ctrl">
-        <button type="button" data-prev>Prev</button>
-        <button type="button" data-toggle>Pause</button>
-        <button type="button" data-next>Next</button>
-        <button type="button" data-close>Close</button>
-      </span>
-    </div>
+  <!-- 单击放大的弹窗 -->
+  <div class="lb" data-lb hidden>
+    <img alt="" data-lb-img />
   </div>
 </Base>
 
@@ -149,17 +142,12 @@ const views = [
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const pad2 = (n: number) => String(n).padStart(2, '0');
   const chOf = (i: number) => figures[i].closest<HTMLElement>('.ch')!;
-  const caption = (i: number) => {
-    const ch = chOf(i);
-    const inCh = $$('.ph', ch);
-    return `${ch.dataset.title} ${ch.dataset.zh}  —  ${pad2(inCh.indexOf(figures[i]) + 1)} / ${pad2(inCh.length)}`;
-  };
   const centerOn = (el: Element) => {
     const b = el.getBoundingClientRect();
     scrollTo({ top: scrollY + b.top + b.height / 2 - innerHeight / 2, behavior: 'instant' });
   };
 
-  /* ── 当前章节：目录高亮 + 深色章节切换背景 ── */
+  /* ── 当前相册：目录高亮 + 深色相册切换背景 ── */
   let current: HTMLElement | null = null;
   function setCurrent(el: HTMLElement | null, theme?: string) {
     current = el;
@@ -185,8 +173,25 @@ const views = [
     { rootMargin: '0px 0px -6% 0px' },
   );
 
+  /* ── 头图轮播 ── */
+  const slides = $$('[data-slide]');
+  const bars = $$('[data-bar]');
+  const heroNow = $('[data-hero-now]');
+  const albumNames = $$<HTMLElement>('.ch').map((c) => `${c.dataset.title} ${c.dataset.zh}`);
+  let hi = 0, heroTimer = 0;
+  function heroGo(i: number) {
+    hi = (i + slides.length) % slides.length;
+    slides.forEach((s, k) => s.classList.toggle('on', k === hi));
+    bars.forEach((b, k) => { b.classList.remove('on'); if (k === hi) { void b.offsetWidth; b.classList.add('on'); } });
+    heroNow.textContent = albumNames[hi];
+    const next = slides[(hi + 1) % slides.length].querySelector('img');
+    if (next) next.loading = 'eager';
+  }
+  function heroPlay() { clearInterval(heroTimer); if (!reduce) heroTimer = window.setInterval(() => heroGo(hi + 1), 6000); }
+  bars.forEach((b, k) => b.addEventListener('click', () => { heroGo(k); heroPlay(); }));
+  heroGo(0); heroPlay();
+
   /* ── 画廊视图 ── */
-  const gal = $('[data-gal]');
   const galImg = $<HTMLImageElement>('[data-gal-img]');
   const galCap = $('[data-gal-cap]');
   const thumbs = $$<HTMLButtonElement>('.gal-th');
@@ -199,13 +204,18 @@ const views = [
     galImg.srcset = src.srcset;
     galImg.src = src.src;
     galImg.decode().then(() => galImg.classList.add('on'), () => galImg.classList.add('on'));
-    galCap.textContent = caption(gi);
+    const ch = chOf(gi);
+    const inCh = $$('.ph', ch);
+    galCap.textContent = `${ch.dataset.title} ${ch.dataset.zh}  —  ${pad2(inCh.indexOf(figures[gi]) + 1)} / ${pad2(inCh.length)}`;
     thumbs.forEach((t, k) => t.classList.toggle('on', k === gi));
     if (scrollStrip) thumbs[gi].scrollIntoView({ inline: 'center', block: 'nearest', behavior: reduce ? 'instant' : 'smooth' });
-    setCurrent(chOf(gi));
+    setCurrent(ch);
   }
   thumbs.forEach((t, k) => t.addEventListener('click', () => galSelect(k, false)));
-  $('[data-gal-stage]').addEventListener('click', (e) => galSelect((e as MouseEvent).clientX < innerWidth / 2 + 100 ? gi - 1 : gi + 1));
+  $('[data-gal-stage]').addEventListener('click', (e) => {
+    const b = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    galSelect((e as MouseEvent).clientX < b.left + b.width / 2 ? gi - 1 : gi + 1);
+  });
 
   /* ── 视图切换 ── */
   const sizesFor: Record<string, (img: HTMLImageElement) => string> = {
@@ -213,14 +223,11 @@ const views = [
     grid: () => '(max-width: 640px) 50vw, 22vw',
     gallery: (img) => img.dataset.sizes || '100vw',
   };
-  function visibleFigure() {
-    return figures.find((f) => { const b = f.getBoundingClientRect(); return b.bottom > innerHeight * 0.3 && b.top < innerHeight; });
-  }
+  const visibleFigure = () =>
+    figures.find((f) => { const b = f.getBoundingClientRect(); return b.bottom > innerHeight * 0.3 && b.top < innerHeight; });
   function setView(view: string, init = false) {
     if (!(view in sizesFor)) view = 'album';
-    const prev = html.dataset.view;
-    // 记住当前位置：画廊里选中的那张，或视口里的那张
-    const anchorFig = init ? undefined : prev === 'gallery' ? figures[gi] : visibleFigure();
+    const anchorFig = init ? undefined : html.dataset.view === 'gallery' ? figures[gi] : visibleFigure();
     html.dataset.view = view;
     try { localStorage.setItem('view', view); } catch {}
     $$('[data-view-btn]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.viewBtn === view)));
@@ -240,7 +247,7 @@ const views = [
   setView(html.dataset.view || 'album', true);
   $$('.reveal').forEach((el) => revealIO.observe(el));
 
-  // 画廊视图下，点目录 = 跳到该章第一张
+  // 画廊视图下，点目录 = 跳到该相册第一张
   $$<HTMLAnchorElement>('a[href^="#"]').forEach((a) => a.addEventListener('click', (e) => {
     if (html.dataset.view !== 'gallery') return;
     const ch = document.getElementById(a.getAttribute('href')!.slice(1));
@@ -269,64 +276,74 @@ const views = [
     items.forEach((it) => it.style.removeProperty('--s'));
   });
 
-  /* ── 全屏查看 / 轮播（Play，以及 Grid 下单击放大） ── */
-  const show = $('[data-show]');
-  const imgs = [$<HTMLImageElement>('[data-a]', show), $<HTMLImageElement>('[data-b]', show)];
-  const cap = $('[data-cap]', show);
-  const toggle = $<HTMLButtonElement>('[data-toggle]', show);
-  let idx = 0, front = 0, timer = 0, playing = false;
-
-  function display(i: number) {
-    idx = (i + figures.length) % figures.length;
-    const src = figures[idx].querySelector('img')!;
-    const back = imgs[1 - front];
-    back.sizes = '100vw';
-    back.srcset = src.srcset;
-    back.src = src.src;
-    const swap = () => { back.classList.add('on'); imgs[front].classList.remove('on'); front = 1 - front; };
-    back.decode().then(swap, swap);
-    const ch = chOf(idx);
-    const inCh = $$('.ph', ch);
-    cap.textContent = `${pad2(inCh.indexOf(figures[idx]) + 1)} / ${pad2(inCh.length)}`;
-    $$('[data-show-ch]', show).forEach((b) => b.classList.toggle('on', b.dataset.showCh === ch.id));
-    const pre = new Image(); pre.sizes = '100vw'; pre.srcset = figures[(idx + 1) % figures.length].querySelector('img')!.srcset;
+  /* ── 单击放大：从原位置放大成弹窗，再次单击缩回 ── */
+  const lb = $('[data-lb]');
+  const lbImg = $<HTMLImageElement>('[data-lb-img]');
+  let li = -1;
+  function targetRect(r: number) {
+    const maxW = innerWidth * (innerWidth < 640 ? 0.94 : 0.86);
+    const maxH = innerHeight * 0.86;
+    const w = Math.min(maxW, maxH * r), h = w / r;
+    return { left: (innerWidth - w) / 2, top: (innerHeight - h) / 2, width: w, height: h };
   }
-  function schedule() { clearInterval(timer); if (playing) timer = window.setInterval(() => display(idx + 1), 5000); }
-  function setPlaying(p: boolean) { playing = p; toggle.textContent = p ? 'Pause' : 'Play'; schedule(); }
-  function openShow(start: number, autoplay: boolean) {
-    show.hidden = false; html.classList.add('lock');
-    imgs.forEach((im) => im.classList.remove('on'));
-    display(start);
-    setPlaying(autoplay && !reduce);
+  function place(i: number) {
+    const f = figures[i];
+    const src = f.querySelector('img')!;
+    const t = targetRect(parseFloat(f.dataset.r || '1'));
+    Object.assign(lbImg.style, { left: `${t.left}px`, top: `${t.top}px`, width: `${t.width}px`, height: `${t.height}px` });
+    lbImg.removeAttribute('srcset');
+    lbImg.src = src.currentSrc || src.src; // 先用已加载的图，立刻显示
+    lbImg.sizes = `${Math.round(t.width)}px`;
+    lbImg.srcset = src.srcset; // 再换成更清晰的版本
+    return t;
   }
-  function closeShow() {
-    show.hidden = true; html.classList.remove('lock'); clearInterval(timer);
-    if (html.dataset.view === 'gallery') galSelect(idx);
-    else centerOn(figures[idx]);
+  function flipFrom(i: number, t: { left: number; top: number; width: number }) {
+    const b = figures[i].getBoundingClientRect();
+    const s = b.width / t.width;
+    return `translate(${b.left - t.left}px, ${b.top - t.top}px) scale(${s})`;
   }
-  $$('[data-play]').forEach((b) => b.addEventListener('click', () => {
-    const start = html.dataset.view === 'gallery' ? figures[gi] : visibleFigure() ?? (current ? $('.ph', current) : figures[0]);
-    openShow(figures.indexOf(start), true);
-  }));
-  // Album / Grid：单击放大预览
-  figures.forEach((f, i) => f.addEventListener('click', () => { if (html.dataset.view !== 'gallery') openShow(i, false); }));
-
-  $$('[data-show-ch]', show).forEach((b) => b.addEventListener('click', () => {
-    display(figures.indexOf($('.ph', document.getElementById(b.dataset.showCh!)!)));
-    schedule();
-  }));
-  $('[data-close]', show).addEventListener('click', closeShow);
-  $('[data-prev]', show).addEventListener('click', () => { display(idx - 1); schedule(); });
-  $('[data-next]', show).addEventListener('click', () => { display(idx + 1); schedule(); });
-  toggle.addEventListener('click', () => setPlaying(!playing));
-  $('[data-stage]', show).addEventListener('click', (e) => { display((e as MouseEvent).clientX < innerWidth / 2 ? idx - 1 : idx + 1); schedule(); });
+  function openLb(i: number) {
+    li = i;
+    const t = place(i);
+    lb.hidden = false;
+    html.classList.add('lock');
+    figures[i].classList.add('lifted');
+    if (reduce) { lb.classList.add('on'); return; }
+    lbImg.style.transition = 'none';
+    lbImg.style.transform = flipFrom(i, t);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      lbImg.style.transition = '';
+      lbImg.style.transform = 'none';
+      lb.classList.add('on');
+    }));
+  }
+  function closeLb() {
+    if (li < 0) return;
+    const i = li; li = -1;
+    lb.classList.remove('on');
+    const done = () => { lb.hidden = true; html.classList.remove('lock'); figures[i].classList.remove('lifted'); lbImg.style.transform = ''; };
+    if (reduce) return done();
+    const t = lbImg.getBoundingClientRect();
+    lbImg.style.transform = flipFrom(i, t);
+    setTimeout(done, 420);
+  }
+  function stepLb(d: number) {
+    if (li < 0) return;
+    figures[li].classList.remove('lifted');
+    li = (li + d + figures.length) % figures.length;
+    figures[li].classList.add('lifted');
+    centerOn(figures[li]);
+    place(li);
+  }
+  figures.forEach((f, i) => f.addEventListener('click', () => { if (html.dataset.view !== 'gallery') openLb(i); }));
+  lb.addEventListener('click', closeLb);
+  addEventListener('resize', () => { if (li >= 0) place(li); });
 
   addEventListener('keydown', (e) => {
-    if (!show.hidden) {
-      if (e.key === 'Escape') closeShow();
-      else if (e.key === 'ArrowRight') { display(idx + 1); schedule(); }
-      else if (e.key === 'ArrowLeft') { display(idx - 1); schedule(); }
-      else if (e.key === ' ') { e.preventDefault(); setPlaying(!playing); }
+    if (li >= 0) {
+      if (e.key === 'Escape') closeLb();
+      else if (e.key === 'ArrowRight') stepLb(1);
+      else if (e.key === 'ArrowLeft') stepLb(-1);
     } else if (html.dataset.view === 'gallery') {
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); galSelect(gi + 1); }
       else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); galSelect(gi - 1); }
@@ -342,19 +359,17 @@ const views = [
   .views button[aria-pressed='true'],
   .sheet-views button[aria-pressed='true'] { color: var(--fg); }
 
-  /* Album / Grid 下照片可单击放大 */
   :global(html:not([data-view='gallery'])) .ch :global(.ph) { cursor: zoom-in; }
 
   /* ── 左侧目录 ── */
   .rail {
     position: fixed;
     z-index: 30;
-    top: calc(var(--header) + 22vh);
+    top: calc(var(--header) + 40px);
     left: var(--gutter);
     width: calc(var(--rail) - var(--gutter) - 16px);
   }
-  .rail-part + .rail-part,
-  [data-dock] + .rail-part { margin-top: 28px; }
+  .rail-part + .rail-part { margin-top: 32px; }
   .rail-label { margin: 0 0 10px; font-size: 11px; letter-spacing: 0.04em; }
   .rail ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
   .ri {
@@ -391,20 +406,84 @@ const views = [
 
   main { padding-left: var(--rail); }
 
-  /* ── 开头 ── */
-  .intro { padding: calc(var(--header) + 22vh) var(--gutter) 16vh; }
-  h1 {
-    margin: 0 0 10px;
-    font-size: clamp(34px, 4.4vw, 64px);
+  /* ── 头图 ── */
+  .hero {
+    position: relative;
+    height: calc(100svh - var(--header));
+    margin-top: var(--header);
+    overflow: hidden;
+    background: #111;
+    color: #fff;
+  }
+  .hero-slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 1.8s var(--ease);
+  }
+  .hero-slide.on { opacity: 1; z-index: 1; }
+  .hero-slide :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.06);
+    transition: transform 8s linear;
+  }
+  .hero-slide.on :global(img) { transform: scale(1); }
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: 50% 0 0 0;
+    z-index: 2;
+    background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.42));
+    pointer-events: none;
+  }
+  .hero-text,
+  .hero-index {
+    position: absolute;
+    z-index: 3;
+    bottom: clamp(20px, 4vh, 40px);
+  }
+  .hero-text { left: var(--gutter); }
+  .hero-text h1 {
+    margin: 0 0 6px;
+    font-size: clamp(30px, 3.6vw, 52px);
     font-weight: 500;
     letter-spacing: -0.035em;
     line-height: 1;
   }
-  .intro p { margin: 0; }
+  .hero-text p { margin: 0; opacity: 0.75; }
+  .hero-index {
+    right: var(--gutter);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+  }
+  .hero-now { opacity: 0.85; }
+  .hero-bars { display: flex; gap: 6px; }
+  .bar { width: 22px; height: 12px; display: flex; align-items: center; }
+  .bar i {
+    display: block;
+    width: 100%;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.35);
+    position: relative;
+    overflow: hidden;
+  }
+  .bar i::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  .bar.on i::after { animation: fill 6s linear forwards; }
+  @keyframes fill { to { transform: scaleX(1); } }
 
-  /* ── 章节 ── */
+  /* ── 相册 ── */
   .ch { padding-top: clamp(100px, 20vh, 240px); }
-  .ch:first-of-type { padding-top: 0; }
   .ch-head {
     display: flex;
     align-items: baseline;
@@ -421,8 +500,7 @@ const views = [
 
   /* ── 画廊视图 ── */
   .gal { display: none; }
-  :global(html[data-view='gallery']) main > :global(*:not(.foot)) { display: none; }
-  :global(html[data-view='gallery']) .foot { display: none; }
+  :global(html[data-view='gallery']) main { display: none; }
   :global(html[data-view='gallery']) .gal {
     position: fixed;
     inset: var(--header) 0 0 var(--rail);
@@ -466,62 +544,52 @@ const views = [
   .gal-th:hover { opacity: 0.85; }
   .gal-th.on { opacity: 1; transform: translateY(-4px); }
 
+  /* ── 放大弹窗 ── */
+  .lb {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    cursor: zoom-out;
+  }
+  .lb[hidden] { display: none; }
+  .lb::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--bg);
+    opacity: 0;
+    transition: opacity 0.4s var(--ease);
+  }
+  .lb.on::before { opacity: 0.94; }
+  .lb img {
+    position: fixed;
+    object-fit: cover;
+    transform-origin: 0 0;
+    transition: transform 0.42s var(--ease);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.18);
+  }
+  .ch :global(.ph.lifted) { visibility: hidden; }
+
+  /* ── 手机 ── */
   @media (max-width: 899px) {
     .rail { display: none; }
+    .hero { height: 72svh; }
+    .hero-now { display: none; }
     .gal-th { height: 52px; }
-    .intro { padding-top: calc(var(--header) + 14vh); padding-bottom: 10vh; }
   }
 
-  /* 手机菜单里的章节和视图 */
   .sheet-photo { display: flex; flex-direction: column; flex: 1; }
-  .sheet-part + .sheet-part { margin-top: 28px; }
   .sheet-part > p { margin: 0 0 10px; }
   .sheet-part ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: 18px; font-weight: 500; }
   .sheet-part ol .muted { font-size: 13px; font-weight: 400; }
   .sheet-views { margin-top: auto; padding-top: 32px; display: flex; gap: 22px; }
 
-  /* ── 全屏轮播 ── */
-  .show { position: fixed; inset: 0; z-index: 80; background: #000; color: #e8e8e4; }
-  .show[hidden] { display: none; }
-  .show-stage { position: absolute; inset: 0 0 56px 0; cursor: pointer; }
-  .show-stage img {
-    position: absolute;
-    inset: 4vh 4vw;
-    width: calc(100% - 8vw);
-    height: calc(100% - 8vh);
-    object-fit: contain;
-    opacity: 0;
-    transition: opacity 1.2s var(--ease);
-  }
-  .show-stage img.on { opacity: 1; }
-  .show-bar {
-    position: absolute;
-    inset: auto 0 0 0;
-    height: 56px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 var(--gutter);
-  }
-  .show-left { display: flex; align-items: center; gap: 24px; min-width: 0; }
-  .show-chs { display: flex; gap: 16px; overflow-x: auto; scrollbar-width: none; }
-  .show-chs::-webkit-scrollbar { display: none; }
-  .show-chs button { flex: none; color: #6f6f6b; transition: color 0.3s; }
-  .show-chs button:hover { color: #c8c8c4; }
-  .show-chs button.on { color: #fff; }
-  .show-count { flex: none; color: #8a8a86; }
-  .show-ctrl { display: flex; gap: 20px; flex: none; padding-left: 24px; }
-  @media (max-width: 640px) {
-    .show-bar { flex-direction: column; align-items: stretch; justify-content: center; gap: 10px; height: 88px; }
-    .show-stage { bottom: 88px; }
-    .show-left { justify-content: space-between; }
-    .show-ctrl { padding-left: 0; justify-content: space-between; }
-  }
-  .show-ctrl button { color: #8a8a86; transition: color 0.3s; }
-  .show-ctrl button:hover { color: #fff; }
-
   @media (prefers-reduced-motion: reduce) {
-    .show-stage img,
-    .thumb { transition: none; }
+    .thumb,
+    .hero-slide,
+    .hero-slide :global(img),
+    .lb img,
+    .lb::before { transition: none; }
+    .bar.on i::after { animation: none; transform: scaleX(1); }
   }
 </style>

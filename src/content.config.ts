@@ -9,7 +9,6 @@ const series = defineCollection({
   schema: z.object({
     title: z.string(),
     zh: z.string().optional(),
-    part: z.enum(['series', 'notes']).default('notes'), // series = 专门拍摄的系列；notes = 零散积攒
     place: z.string().optional(),
     order: z.number(),
     folder: z.string().optional(), // 默认 = 文件名

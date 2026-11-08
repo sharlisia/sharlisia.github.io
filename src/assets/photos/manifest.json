@@ -39,10 +39,6 @@
     "original": "building/微信图片_20261103150855_289_132.jpg",
     "sha1": "a00642b01de41321659361a4e7e5273f67368930"
   },
-  "building/building-10.jpg": {
-    "original": "building/微信图片_20261107100526_337_132.jpg",
-    "sha1": "f205eb27d3a10ff0984a9a5a038eb9dbc399ea17"
-  },
   "building/building-11.jpg": {
     "original": "building/微信图片_20261107100526_351_132.jpg",
     "sha1": "e062673320b861717f8768fee9428504a8e4094b"
@@ -86,10 +82,6 @@
   "cold/cold-04.jpg": {
     "original": "cold/IMG_20221022_154403.jpg",
     "sha1": "44d8da0f697f75d8797f0290949afeb22625ada2"
-  },
-  "cold/cold-05.jpg": {
-    "original": "cold/IMG_20221022_154413.jpg",
-    "sha1": "6b8eec5e9bfd479a2d681f409980f0df8e8b241b"
   },
   "cold/cold-06.jpg": {
     "original": "cold/IMG_20221022_154422.jpg",
@@ -151,10 +143,6 @@
     "original": "cold/微信图片_20261107100526_323_132.jpg",
     "sha1": "530c38f1663c85b91b2b451ebcf5baa8eda2ff08"
   },
-  "cold/cold-21.jpg": {
-    "original": "cold/微信图片_20261107100526_346_132.jpg",
-    "sha1": "0cb33c53a3add3077776307367b9f73e433b69d7"
-  },
   "cold/cold-22.jpg": {
     "original": "cold/微信图片_20261107100526_354_132.jpg",
     "sha1": "421d549550e46cfe1f1793a519ad78ee9bb9a1a3"
@@ -195,10 +183,6 @@
     "original": "cold/微信图片_20261107102038_437_132.jpg",
     "sha1": "5fcd5645447d60b485b96e76d91b1b7e588c0024"
   },
-  "cold/cold-32.jpg": {
-    "original": "cold/微信图片_20261107102038_446_132.jpg",
-    "sha1": "4cbe4f1f0556d4e11792b54cedd1e2f621ec0119"
-  },
   "cold/cold-33.jpg": {
     "original": "cold/微信图片_20261107102038_447_132.jpg",
     "sha1": "07f208b15e4508f2457ae9b392e50c8c7717f8eb"
@@ -235,10 +219,6 @@
     "original": "cold/微信图片_20261107102038_467_132.jpg",
     "sha1": "0f7457ed4bc05e8e62ed9e6be2a4d21187114101"
   },
-  "cold/cold-42.jpg": {
-    "original": "cold/微信图片_20261107102038_468_132.jpg",
-    "sha1": "d4fa8b917d4af1729370025406797cd55918fc51"
-  },
   "color/color-00.jpg": {
     "original": "color/IMG_20221031_172033_mh1667208478159.jpg",
     "sha1": "8d34e0a079b8ce841fab154f82bf25abc313b4d4"
@@ -246,10 +226,6 @@
   "color/color-01.jpg": {
     "original": "color/MTXX_MH20230205204911888.jpg",
     "sha1": "978153eb9e48c9da56352067eeb029a0869dd3c7"
-  },
-  "color/color-02.jpg": {
-    "original": "color/mmexport1719234876872.jpg",
-    "sha1": "109730e31b6aa12ef0b49b965aeca52af0a0f61b"
   },
   "color/color-03.jpg": {
     "original": "color/mmexport1719234885675.jpg",
@@ -286,10 +262,6 @@
   "deep/deep-00.jpg": {
     "original": "deep/1702719703633.jpg",
     "sha1": "9fd7391d89be7dc2b363b23944c6aaf4a98bae8a"
-  },
-  "deep/deep-01.jpg": {
-    "original": "deep/IMG_20210826_184128_mh1629974612895.jpg",
-    "sha1": "73711f34a5e7f6ac9181990297ff72b42fd0a44a"
   },
   "deep/deep-02.jpg": {
     "original": "deep/IMG_20211010_175655.jpg",
@@ -575,10 +547,6 @@
     "original": "plant/微信图片_20261107102038_411_132.jpg",
     "sha1": "aee16435ff9dd011381a7414bd06845cd1199e2d"
   },
-  "shine/shine-00.jpg": {
-    "original": "shine/IMG_20220513_183926_mh1652438455563.jpg",
-    "sha1": "10148465d515d33779c810e02e97ddf619fbb185"
-  },
   "shine/shine-01.jpg": {
     "original": "shine/IMG_20221022_162339_mh1666432160652.jpg",
     "sha1": "7317c73ea09c3446008534b1c11dad735383f936"
@@ -654,5 +622,13 @@
   "shine/shine-19.jpg": {
     "original": "shine/微信图片_20261107102038_416_132.jpg",
     "sha1": "70beb8aff8c8e2bc267a410d0c66819f78ca2d8a"
+  },
+  "cold/cold-43.jpg": {
+    "original": "cold/IMG_20220513_183926_mh1652438455563.jpg",
+    "sha1": "10148465d515d33779c810e02e97ddf619fbb185"
+  },
+  "shine/shine-20.jpg": {
+    "original": "shine/IMG_20210826_184128_mh1629974612895.jpg",
+    "sha1": "73711f34a5e7f6ac9181990297ff72b42fd0a44a"
   }
 }

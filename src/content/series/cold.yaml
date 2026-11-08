@@ -1,11 +1,11 @@
 title: Pale
 zh: 清
 order: 4
-cover: 05
-hidden: [36, 42]
+cover: 04
+hidden: [36]
 groups:
   - rows:
-      - stack: [04, 05, 06]
+      - stack: [04, 06]
   - rows:
       - full: 13
       - stack: [11, 12, 14]
@@ -14,12 +14,11 @@ groups:
   - rows:
       - row: [01, 02, 08]
       - left: 07
-      - right: 21
       - center: 28
       - row: [00, 03]
   - rows:
       - center: 30
-      - row: [31, 32]
+      - row: [31, 43]
       - row: [33, 34]
       - row: [35, 37]
       - row: [38, 39, 40]

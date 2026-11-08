@@ -6,7 +6,7 @@ theme: dark
 groups:
   - rows:
       - full: 03
-      - row: [02, 04]
+      - wide: 04
   - rows:
       - center: 01
       - row: [00, 07]

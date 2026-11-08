@@ -35,7 +35,6 @@ export interface Series {
   slug: string;
   title: string;
   zh?: string;
-  part: 'series' | 'notes';
   place?: string;
   theme: 'light' | 'dark';
   cover: Photo;
@@ -75,11 +74,10 @@ function build(entry: CollectionEntry<'series'>): Series {
   if (rest.length) groups.push({ rows: autoRows(rest) });
 
   const count = groups.reduce((n, g) => n + g.rows.reduce((m, r) => m + r.photos.length, 0), 0);
-  return { slug: entry.id, title: d.title, zh: d.zh, part: d.part, place: d.place, theme: d.theme, cover: resolve(d.cover, folder), groups, count };
+  return { slug: entry.id, title: d.title, zh: d.zh, place: d.place, theme: d.theme, cover: resolve(d.cover, folder), groups, count };
 }
 
 export async function getSeries(): Promise<Series[]> {
   const entries = await getCollection('series');
-  const rank = (e: CollectionEntry<'series'>) => (e.data.part === 'series' ? 0 : 1);
-  return entries.sort((a, b) => rank(a) - rank(b) || a.data.order - b.data.order).map(build);
+  return entries.sort((a, b) => a.data.order - b.data.order).map(build);
 }

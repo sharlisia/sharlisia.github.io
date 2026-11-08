@@ -1,8 +1,7 @@
 title: Eaves
 zh: 檐
-part: series
 place: Summer Palace, Beijing
-order: 1
+order: 0
 cover: 08
 hidden: [15, 16]
 groups:
@@ -12,8 +11,7 @@ groups:
       - wide: 01
   - rows:
       - row: [04, 09]
-      - left: 10
-      - right: 11
+      - center: 11
   - rows:
       - row: [03, 05]
       - row: [06, 07]

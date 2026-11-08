@@ -11,7 +11,7 @@ groups:
   - rows:
       - row: [10, 11]
       - full: 14
-      - row: [01, 03]
+      - wide: 03
   - rows:
       - row: [12, 13]
       - center: 25

@@ -2,7 +2,6 @@ title: Sunlit
 zh: 晴
 order: 1
 cover: 07
-hidden: [00]
 groups:
   - rows:
       - center: 07
@@ -10,7 +9,7 @@ groups:
       - row: [09, 10]
       - row: [08, 11]
   - rows:
-      - center: 12
+      - row: [12, 20]
       - full: 14
       - row: [13, 15]
   - rows:
