@@ -3,6 +3,7 @@ zh: 晴
 order: 1
 cover: 07
 backdrop: 14
+tint: "#2f78e0"
 groups:
   - rows:
       - center: 07

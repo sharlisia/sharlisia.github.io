@@ -3,6 +3,7 @@ zh: 味
 order: 6
 cover: 09
 backdrop: 10
+tint: "#9c6a3c"
 hidden: [11, 14, 17]
 groups:
   - rows:

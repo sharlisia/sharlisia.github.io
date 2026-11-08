@@ -1,11 +1,17 @@
 @import '@fontsource-variable/inter-tight/wght.css';
 
+/*
+ * 配色：底色是肉眼几乎看不出的极浅紫；
+ * 文字是带紫调的近黑；未选中 = 灰紫，选中 / 当前 = 深紫。
+ */
 :root {
-  --bg: #f5f5f3;
-  --fg: #111111;
-  --muted: #9a9a96;
-  --line: rgba(17, 17, 17, 0.1);
-  --ph: #e9e9e6;
+  --bg: #f7f5fb;
+  --fg: #1d1828;
+  --muted: #a49db4;
+  --line: rgba(62, 44, 104, 0.12);
+  --ph: #ece8f4;
+  --accent: #4a2d8c;
+  --accent-soft: rgba(74, 45, 140, 0.14);
 
   --sans: 'Inter Tight Variable', -apple-system, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
 
@@ -20,12 +26,15 @@
   :root { --rail: 200px; }
 }
 
+/* 深色：接近黑的深茄紫 */
 [data-theme='dark'] {
-  --bg: #0b0b0b;
-  --fg: #ededea;
-  --muted: #6f6f6b;
-  --line: rgba(237, 237, 234, 0.12);
-  --ph: #191919;
+  --bg: #110d18;
+  --fg: #efebf7;
+  --muted: #7e7593;
+  --line: rgba(239, 235, 247, 0.12);
+  --ph: #1d1826;
+  --accent: #c7b6f7;
+  --accent-soft: rgba(199, 182, 247, 0.22);
 }
 
 *,
@@ -54,6 +63,9 @@ body {
   transition: background-color 0.9s var(--ease), color 0.9s var(--ease);
 }
 
+::selection { background: var(--accent-soft); color: inherit; }
+:focus-visible { outline: 1px solid var(--accent); outline-offset: 3px; }
+
 a { color: inherit; text-decoration: none; }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
 figure { margin: 0; }
@@ -61,12 +73,16 @@ img { display: block; max-width: 100%; height: auto; }
 
 .muted { color: var(--muted); transition: color 0.9s var(--ease); }
 
-/* 进入视口时淡入（仅 JS 可用时启用） */
-.js .reveal { opacity: 0; transition: opacity 1.2s var(--ease); }
-.js .reveal.in { opacity: 1; }
+/* 进入视口时从下方浮起并渐显（仅 JS 可用时启用，无 JS 照常显示） */
+.js .reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 1.4s var(--ease), transform 1.4s var(--ease);
+}
+.js .reveal.in { opacity: 1; transform: none; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   html, body { transition: none; }
-  .js .reveal { opacity: 1; transition: none; }
+  .js .reveal { opacity: 1; transform: none; transition: none; }
 }

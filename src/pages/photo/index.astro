@@ -97,7 +97,7 @@ const HERO_SIZES = '(min-width: 900px) calc(100vw - 200px), 100vw';
     {albums.map((c) => (
       <section class="ch" id={c.id} data-theme-zone={c.theme} data-title={c.title} data-zh={c.zh ?? ''}>
         <!-- 背景：低透明度 + 视差 -->
-        <div class="ch-bg" aria-hidden="true">
+        <div class="ch-bg" aria-hidden="true" style={c.tint ? `--tint:${c.tint}` : undefined}>
           <Image
             src={c.backdrop.src}
             alt=""
@@ -176,11 +176,23 @@ const HERO_SIZES = '(min-width: 900px) calc(100vw - 200px), 100vw';
   );
   $$('[data-theme-zone]').forEach((z) => spy.observe(z));
 
-  /* ── 淡入 ── */
+  /* ── 滑动渐显：同一批进入视口的照片按位置依次浮现 ── */
   const revealIO = new IntersectionObserver(
-    (es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); revealIO.unobserve(e.target); } }),
-    { rootMargin: '0px 0px -6% 0px' },
+    (es) => {
+      const hits = es.filter((e) => e.isIntersecting).map((e) => e.target as HTMLElement);
+      hits.sort((a, b) => { const ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect(); return ra.top - rb.top || ra.left - rb.left; });
+      hits.forEach((el, k) => {
+        el.style.transitionDelay = `${Math.min(k, 6) * 110}ms`;
+        el.classList.add('in');
+        revealIO.unobserve(el);
+        setTimeout(() => { el.style.transitionDelay = ''; }, 1500 + k * 110);
+      });
+    },
+    { rootMargin: '0px 0px -8% 0px' },
   );
+  function replayReveal() {
+    figures.forEach((f) => { f.classList.remove('in'); revealIO.observe(f); });
+  }
 
   /* ── 头图轮播 ── */
   const slides = $$('[data-slide]');
@@ -262,18 +274,17 @@ const HERO_SIZES = '(min-width: 900px) calc(100vw - 200px), 100vw';
     figures.forEach((f) => {
       const img = f.querySelector('img')!;
       img.sizes = sizesFor[view](img);
-      if (!init) f.classList.add('in');
     });
     if (view === 'gallery') {
       galSelect(anchorFig ? figures.indexOf(anchorFig) : current ? figures.indexOf($('.ph', current)) : 0);
       scrollTo({ top: 0, behavior: 'instant' });
-    } else if (anchorFig) {
-      centerOn(anchorFig);
+    } else {
+      if (anchorFig) centerOn(anchorFig);
+      replayReveal(); // 切到 Album / Grid 时，照片重新依次浮现
     }
   }
   $$('[data-view-btn]').forEach((b) => b.addEventListener('click', () => setView(b.dataset.viewBtn!)));
   setView(html.dataset.view || 'album', true);
-  $$('.reveal').forEach((el) => revealIO.observe(el));
 
   // 画廊视图下，点目录 = 跳到该相册第一张
   $$<HTMLAnchorElement>('a[href^="#"]').forEach((a) => a.addEventListener('click', (e) => {
@@ -383,9 +394,9 @@ const HERO_SIZES = '(min-width: 900px) calc(100vw - 200px), 100vw';
   .views { display: flex; flex-wrap: wrap; gap: 6px 14px; }
   .views button,
   .sheet-views button { color: var(--muted); transition: color 0.3s; }
-  .views button:hover,
+  .views button:hover { color: var(--fg); }
   .views button[aria-pressed='true'],
-  .sheet-views button[aria-pressed='true'] { color: var(--fg); }
+  .sheet-views button[aria-pressed='true'] { color: var(--accent); }
 
   :global(html:not([data-view='gallery'])) .ch :global(.ph) { cursor: zoom-in; }
 
@@ -410,8 +421,8 @@ const HERO_SIZES = '(min-width: 900px) calc(100vw - 200px), 100vw';
     transition: color 0.4s var(--ease), gap 0.35s var(--ease);
   }
   .ri .t { flex: 1; }
-  .ri:hover,
-  .ri.active { color: var(--fg); }
+  .ri:hover { color: var(--fg); }
+  .ri.active { color: var(--accent); }
 
   /* 封面：平时收起，悬停目录时抽出，并按 --s 放大 */
   .thumb {
@@ -506,11 +517,16 @@ const HERO_SIZES = '(min-width: 900px) calc(100vw - 200px), 100vw';
   .ch-bg {
     position: sticky;
     top: 0;
+    /* 左右满铺：越过左侧目录栏，铺满整个窗口宽度 */
+    width: 100vw;
+    margin-left: calc(-1 * var(--rail));
     height: 100svh;
     margin-bottom: -100svh;
     overflow: hidden;
     pointer-events: none;
-    opacity: 0.13;
+    /* 色彩倾向：照片的明暗 + 相册的代表色（duotone） */
+    background-color: var(--tint, transparent);
+    opacity: 0.14;
     -webkit-mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 78%, transparent);
     mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 78%, transparent);
     transition: opacity 0.9s var(--ease);
@@ -522,6 +538,7 @@ const HERO_SIZES = '(min-width: 900px) calc(100vw - 200px), 100vw';
     object-fit: cover;
     transform: scale(1.18);
     will-change: transform;
+    mix-blend-mode: luminosity;
   }
   .ch-head {
     display: flex;

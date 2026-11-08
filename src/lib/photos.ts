@@ -39,6 +39,7 @@ export interface Series {
   theme: 'light' | 'dark';
   cover: Photo;
   backdrop: Photo;
+  tint?: string;
   groups: Group[];
   count: number;
 }
@@ -75,7 +76,7 @@ function build(entry: CollectionEntry<'series'>): Series {
   if (rest.length) groups.push({ rows: autoRows(rest) });
 
   const count = groups.reduce((n, g) => n + g.rows.reduce((m, r) => m + r.photos.length, 0), 0);
-  return { slug: entry.id, title: d.title, zh: d.zh, place: d.place, theme: d.theme, cover: resolve(d.cover, folder), backdrop: resolve(d.backdrop ?? d.cover, folder), groups, count };
+  return { slug: entry.id, title: d.title, zh: d.zh, place: d.place, theme: d.theme, cover: resolve(d.cover, folder), backdrop: resolve(d.backdrop ?? d.cover, folder), tint: d.tint, groups, count };
 }
 
 export async function getSeries(): Promise<Series[]> {
