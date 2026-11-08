@@ -88,6 +88,45 @@ function sizesFor(row: Row, i: number): string {
   /* 连拍序列：保持紧贴，宽度收窄一点 */
   [data-view='album'] .r-stack { display: flex; flex-direction: column; gap: 6px; }
 
+  /* ── 装饰：部分行后面垫一块半透明几何块（颜色取相册色调），压在照片下面露出一角 ── */
+  [data-view='album'] .r { position: relative; isolation: isolate; }
+  [data-view='album'] .g > .r:not(.r-full, .r-stack)::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    pointer-events: none;
+  }
+  /* A：实心色块，偏左下 */
+  [data-view='album'] .g > .r:nth-child(4n + 2):not(.r-full, .r-stack)::before {
+    left: calc(var(--gutter) - 3.2vw);
+    bottom: -4.5vw;
+    width: 34%;
+    height: 62%;
+    background: color-mix(in srgb, var(--tint, var(--accent)) 16%, transparent);
+  }
+  /* B：正方形色块，偏右上 */
+  [data-view='album'] .g > .r:nth-child(4n + 3):not(.r-full, .r-stack)::before {
+    right: calc(var(--gutter) - 2.4vw);
+    top: -3.6vw;
+    width: 19%;
+    aspect-ratio: 1;
+    background: color-mix(in srgb, var(--tint, var(--accent)) 22%, transparent);
+  }
+  /* C：细线框，偏右下 */
+  [data-view='album'] .g > .r:nth-child(4n + 4):not(.r-full, .r-stack)::before {
+    right: calc(var(--gutter) + 6vw);
+    bottom: -3vw;
+    width: 26%;
+    height: 48%;
+    border: 1px solid color-mix(in srgb, var(--tint, var(--accent)) 55%, transparent);
+  }
+  [data-theme='dark'][data-view='album'] .g > .r:nth-child(4n + 2):not(.r-full, .r-stack)::before {
+    background: color-mix(in srgb, var(--tint, var(--accent)) 20%, transparent);
+  }
+  @media (max-width: 640px) {
+    [data-view='album'] .g > .r:nth-child(4n + 3):not(.r-full, .r-stack)::before { width: 28%; }
+  }
+
   @media (max-width: 640px) {
     [data-view='album'] {
       --row-gap: 48px;
