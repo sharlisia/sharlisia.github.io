@@ -30,10 +30,6 @@ const nav = [
         var t = localStorage.getItem('theme');
         if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t;
       } catch (e) {}
-      // 临时：?logo=corinthia 预览备选 logo 字体
-      try {
-        if (new URLSearchParams(location.search).get('logo') === 'corinthia') document.documentElement.dataset.logo = 'corinthia';
-      } catch (e) {}
       try {
         var v = new URLSearchParams(location.search).get('view') || localStorage.getItem('view');
         if (v === 'single') v = 'gallery';
@@ -104,18 +100,15 @@ const nav = [
   .mark {
     font-family: 'WindSong', var(--sans);
     font-weight: 400;
-    font-size: 26px;
+    font-size: 23px;
     line-height: 1;
     white-space: nowrap;
-    margin-right: 48px;
+    margin-right: 56px;
     padding-top: 4px; /* 花体的视觉重心偏上，往下压一点与导航对齐 */
+    /* 字体本身没有更细的字重：用一圈与背景同色的极细描边把笔画削薄一点 */
+    -webkit-text-stroke: 0.35px var(--bg);
   }
-  :global(html[data-logo='corinthia']) .mark {
-    font-family: 'Corinthia', var(--sans);
-    font-size: 40px;
-    padding-top: 2px;
-  }
-  .sections { display: flex; gap: 22px; }
+  .sections { display: flex; gap: 40px; }
   .sections a,
   .sheet-sections a {
     color: var(--muted);

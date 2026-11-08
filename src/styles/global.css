@@ -1,7 +1,5 @@
 @import '@fontsource-variable/inter-tight/wght.css';
 @import '@fontsource/windsong/400.css'; /* 只用于左上角的签名 logo */
-@import '@fontsource/corinthia/400.css'; /* 临时：logo 备选，网址加 ?logo=corinthia 预览，定下来后删掉一个 */
-
 /*
  * 配色：底色是肉眼几乎看不出的极浅紫；
  * 文字是带紫调的近黑；未选中 = 灰紫，选中 / 当前 = 深紫。
