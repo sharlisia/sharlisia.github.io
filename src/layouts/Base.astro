@@ -4,14 +4,14 @@ import { site } from '../site.config';
 
 interface Props {
   title?: string;
-  section: 'home' | 'photography' | 'media-art' | 'graphic-design';
+  section: 'home' | 'photo' | 'media' | 'graphic' | 'none';
 }
 const { title, section } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const nav = [
-  { id: 'photography', label: 'Photography', href: `${base}photo/` },
-  { id: 'media-art', label: 'Media Art', href: `${base}media-art/` },
-  { id: 'graphic-design', label: 'Graphic Design', href: `${base}graphic-design/` },
+  { id: 'photo', label: 'Photo', href: `${base}photo/` },
+  { id: 'media', label: 'Media', href: `${base}media/` },
+  { id: 'graphic', label: 'Graphic', href: `${base}graphic/` },
 ] as const;
 ---
 

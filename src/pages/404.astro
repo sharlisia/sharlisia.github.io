@@ -1,0 +1,30 @@
+---
+import Base from '../layouts/Base.astro';
+const base = import.meta.env.BASE_URL;
+---
+
+<!-- 找不到页面时：旧网址自动跳到新网址，否则显示提示 -->
+<Base title="Not found" section="none">
+  <script is:inline>
+    (function () {
+      var p = location.pathname;
+      var map = { '/media-art': '/media/', '/graphic-design': '/graphic/', '/photography': '/photo/' };
+      // 迁移前的旧前缀 /sharlisia/...
+      var q = p.replace(/^\/sharlisia(?=\/|$)/, '') || '/';
+      var key = q.replace(/\/+$/, '');
+      var target = map[key] || (q !== p ? q : null);
+      if (target && target !== p) location.replace(target + location.search + location.hash);
+    })();
+  </script>
+  <main class="nf">
+    <h1>Not found</h1>
+    <p class="muted"><a href={base}>Back to home</a></p>
+  </main>
+</Base>
+
+<style>
+  .nf { min-height: 100svh; padding: calc(var(--header) + 22vh) var(--gutter) 10vh; }
+  h1 { margin: 0 0 16px; font-size: clamp(30px, 3.6vw, 52px); font-weight: 500; letter-spacing: -0.035em; }
+  a { border-bottom: 1px solid var(--line); }
+  a:hover { color: var(--accent); }
+</style>

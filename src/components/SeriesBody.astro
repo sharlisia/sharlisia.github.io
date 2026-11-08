@@ -47,9 +47,9 @@ function sizesFor(row: Row, i: number): string {
      - 通栏大图保持铺满，作为每组的视觉重音 */
   [data-view='album'] {
     --row-gap: clamp(56px, 11vh, 140px); /* 行与行之间 */
-    --col-gap: clamp(20px, 3.4vw, 64px); /* 同一行图与图之间 */
-    --shift: 11vw; /* 左右偏移量 */
-    --drop: 7vw; /* 高低错落 */
+    --col-gap: clamp(16px, 2.6vw, 48px); /* 同一行图与图之间 */
+    --shift: 6vw; /* 左右偏移量 */
+    --drop: 5vw; /* 高低错落 */
   }
   [data-view='album'] .g + .g { margin-top: clamp(140px, 26vh, 320px); }
   [data-view='album'] .r { padding: 0 var(--gutter); }
@@ -64,14 +64,14 @@ function sizesFor(row: Row, i: number): string {
 
   /* 居中单张：限制高度，四周大量留白 */
   [data-view='album'] .r-center { display: flex; justify-content: center; }
-  [data-view='album'] .r-center .ph { width: min(78%, calc(80svh * var(--r))); }
+  [data-view='album'] .r-center .ph { width: min(90%, calc(86svh * var(--r))); }
 
   /* 大图：不再左右顶满，跟随奇偶行偏左或偏右 */
-  [data-view='album'] .r-wide .ph { width: min(100%, calc(84svh * var(--r))); }
+  [data-view='album'] .r-wide .ph { width: min(100%, calc(90svh * var(--r))); }
   [data-view='album'] .g > .r-wide:nth-child(even) .ph { margin-left: auto; }
 
   /* 偏左 / 偏右的单张 */
-  [data-view='album'] :is(.r-left, .r-right) .ph { width: min(48%, calc(80svh * var(--r))); }
+  [data-view='album'] :is(.r-left, .r-right) .ph { width: min(58%, calc(86svh * var(--r))); }
   [data-view='album'] .r-left .ph { margin-left: 4%; }
   [data-view='album'] .r-right .ph { margin-left: auto; margin-right: 4%; }
 
@@ -102,7 +102,7 @@ function sizesFor(row: Row, i: number): string {
     bottom: -4.5vw;
     width: 34%;
     height: 62%;
-    background: color-mix(in srgb, var(--tint, var(--accent)) 16%, transparent);
+    background: color-mix(in srgb, var(--tint, var(--accent)) 9%, transparent);
   }
   /* B：正方形色块，偏右上 */
   [data-view='album'] .g > .r:nth-child(4n + 3):not(.r-full, .r-stack)::before {
@@ -110,7 +110,7 @@ function sizesFor(row: Row, i: number): string {
     top: -3.6vw;
     width: 19%;
     aspect-ratio: 1;
-    background: color-mix(in srgb, var(--tint, var(--accent)) 22%, transparent);
+    background: color-mix(in srgb, var(--tint, var(--accent)) 13%, transparent);
   }
   /* C：细线框，偏右下 */
   [data-view='album'] .g > .r:nth-child(4n + 4):not(.r-full, .r-stack)::before {
@@ -118,10 +118,10 @@ function sizesFor(row: Row, i: number): string {
     bottom: -3vw;
     width: 26%;
     height: 48%;
-    border: 1px solid color-mix(in srgb, var(--tint, var(--accent)) 55%, transparent);
+    border: 1px solid color-mix(in srgb, var(--tint, var(--accent)) 32%, transparent);
   }
   [data-theme='dark'][data-view='album'] .g > .r:nth-child(4n + 2):not(.r-full, .r-stack)::before {
-    background: color-mix(in srgb, var(--tint, var(--accent)) 20%, transparent);
+    background: color-mix(in srgb, var(--tint, var(--accent)) 12%, transparent);
   }
   @media (max-width: 640px) {
     [data-view='album'] .g > .r:nth-child(4n + 3):not(.r-full, .r-stack)::before { width: 28%; }
