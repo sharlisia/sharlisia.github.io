@@ -96,10 +96,15 @@ const nav = [
     transition: background-color 0.9s var(--ease);
   }
   .top-left { display: flex; align-items: center; }
+  /* 签名 logo：WindSong 花体，只用在这里 */
   .mark {
-    font-weight: 600;
-    letter-spacing: 0.01em;
+    font-family: 'WindSong', var(--sans);
+    font-weight: 400;
+    font-size: 26px;
+    line-height: 1;
+    white-space: nowrap;
     margin-right: 48px;
+    padding-top: 4px; /* 花体的视觉重心偏上，往下压一点与导航对齐 */
   }
   .sections { display: flex; gap: 22px; }
   .sections a,

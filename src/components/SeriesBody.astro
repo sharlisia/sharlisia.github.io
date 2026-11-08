@@ -66,15 +66,13 @@ function sizesFor(row: Row, i: number): string {
   }
 
   /* ───────── 瀑布流 Grid ───────── */
+  /* 等宽列、小间距。每张图的位置由脚本计算（见 photo/index.astro 的 layoutGrid）：
+     先把竖图 / 方图 / 横图交替打散，再放进当前最短的一列 */
   [data-view='grid'] .sb {
-    columns: 4 220px;
-    column-gap: var(--gap);
-    padding: 0 var(--gutter);
+    position: relative;
+    margin: 0 var(--gutter);
   }
   [data-view='grid'] :is(.g, .r) { display: contents; }
-  [data-view='grid'] .sb .ph {
-    break-inside: avoid;
-    margin-bottom: var(--gap);
-  }
+  [data-view='grid'] .sb .ph { position: absolute; }
 
 </style>

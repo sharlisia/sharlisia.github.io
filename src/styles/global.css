@@ -1,4 +1,5 @@
 @import '@fontsource-variable/inter-tight/wght.css';
+@import '@fontsource/windsong/400.css'; /* 只用于左上角的签名 logo */
 
 /*
  * 配色：底色是肉眼几乎看不出的极浅紫；

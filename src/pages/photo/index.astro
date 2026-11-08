@@ -323,11 +323,54 @@ const HERO_SIZES = '100vw';
   /* ── 视图切换 ── */
   const sizesFor: Record<string, (img: HTMLImageElement) => string> = {
     album: (img) => img.dataset.sizes || '100vw',
-    grid: () => '(max-width: 640px) 50vw, 22vw',
+    grid: () => '(max-width: 640px) 50vw, 30vw',
     gallery: (img) => img.dataset.sizes || '100vw',
   };
   const visibleFigure = () =>
     figures.find((f) => { const b = f.getBoundingClientRect(); return b.bottom > innerHeight * 0.3 && b.top < innerHeight; });
+  /* ── Grid 排版：等宽列 + 形状打散 + 放进最短的一列（类似 Unsplash） ── */
+  const shape = (f: HTMLElement) => { const r = parseFloat(f.dataset.r || '1'); return r < 0.9 ? 'P' : r > 1.15 ? 'L' : 'S'; };
+  // 竖 / 方 / 横交替：每次优先挑一张和前两张形状都不同的，挑不到再放宽到和前一张不同
+  function mixShapes(list: HTMLElement[]) {
+    const rest = [...list], out: HTMLElement[] = [];
+    while (rest.length) {
+      const a = out.at(-1), b = out.at(-2);
+      let k = rest.findIndex((f) => (!a || shape(f) !== shape(a)) && (!b || shape(f) !== shape(b)));
+      if (k < 0) k = rest.findIndex((f) => !a || shape(f) !== shape(a));
+      if (k < 0) k = 0;
+      out.push(rest.splice(k, 1)[0]);
+    }
+    return out;
+  }
+  const bodies = $$<HTMLElement>('.ch .sb');
+  const mixed = new Map(bodies.map((sb) => [sb, mixShapes($$<HTMLElement>('.ph', sb))]));
+  function layoutGrid() {
+    const on = html.dataset.view === 'grid';
+    const cols = innerWidth >= 1600 ? 4 : innerWidth >= 900 ? 3 : 2;
+    const gap = innerWidth < 640 ? 8 : 16;
+    for (const sb of bodies) {
+      const list = mixed.get(sb)!;
+      if (!on) {
+        sb.style.height = '';
+        list.forEach((f) => { f.style.left = f.style.top = f.style.width = ''; });
+        continue;
+      }
+      const w = sb.clientWidth;
+      const colW = (w - gap * (cols - 1)) / cols;
+      const heights = new Array(cols).fill(0);
+      for (const f of list) {
+        const c = heights.indexOf(Math.min(...heights));
+        f.style.left = `${c * (colW + gap)}px`;
+        f.style.top = `${heights[c]}px`;
+        f.style.width = `${colW}px`;
+        heights[c] += colW / parseFloat(f.dataset.r || '1') + gap;
+      }
+      sb.style.height = `${Math.max(...heights) - gap}px`;
+    }
+  }
+  let resizeT = 0;
+  addEventListener('resize', () => { clearTimeout(resizeT); resizeT = window.setTimeout(layoutGrid, 120); });
+
   function setView(view: string, init = false) {
     if (!(view in sizesFor)) view = 'album';
     const anchorFig = init ? undefined : html.dataset.view === 'gallery' ? figures[gi] : visibleFigure();
@@ -339,6 +382,7 @@ const HERO_SIZES = '100vw';
       const img = f.querySelector('img')!;
       img.sizes = sizesFor[view](img);
     });
+    layoutGrid();
     if (view === 'gallery') {
       galSelect(anchorFig ? figures.indexOf(anchorFig) : current ? figures.indexOf($('.ph', current)) : 0);
       scrollTo({ top: 0, behavior: 'instant' });
