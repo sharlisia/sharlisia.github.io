@@ -1,4 +1,8 @@
-@import '@fontsource-variable/inter-tight/wght.css';
+/* 全站无衬线：Tomorrow（细、方正、略带未来感）。200 = 导航，300 = 正文，500/600 = 标题 */
+@import '@fontsource/tomorrow/200.css';
+@import '@fontsource/tomorrow/300.css';
+@import '@fontsource/tomorrow/500.css';
+@import '@fontsource/tomorrow/600.css';
 @import '@fontsource/windsong/400.css'; /* 只用于左上角的签名 logo */
 /*
  * 配色：底色是肉眼几乎看不出的极浅紫；
@@ -13,7 +17,7 @@
   --accent: #3f2d8c;
   --accent-soft: rgba(63, 45, 140, 0.14);
 
-  --sans: 'Inter Tight Variable', -apple-system, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+  --sans: 'Tomorrow', -apple-system, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
 
   --header: 56px;
   --rail: 0px; /* 左侧收起的小菜单所占的窄条；照片从它右边开始，不重叠 */
@@ -55,7 +59,8 @@ body {
   min-height: 100svh;
   font-family: var(--sans);
   font-size: 13px;
-  line-height: 1.4;
+  font-weight: 300;
+  line-height: 1.45;
   font-feature-settings: 'tnum' 1;
   background: var(--bg);
   color: var(--fg);

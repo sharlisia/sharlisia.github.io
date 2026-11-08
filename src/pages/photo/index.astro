@@ -546,7 +546,7 @@ const HERO_SIZES = '100vw';
   /* 展开状态：悬停（或键盘聚焦）时出现，底色更实 */
   /* 展开面板：毛玻璃 + 左右两条细浅边；上下不设边框，往上下拉长后自然渐隐 */
   .rail-panel {
-    --fade: 56px; /* 上下各拉长并渐隐的长度 */
+    --fade: 90px; /* 上下各拉长并渐隐的长度 */
     position: absolute;
     top: calc(-1 * var(--fade));
     left: 0;
@@ -558,18 +558,32 @@ const HERO_SIZES = '100vw';
     backdrop-filter: blur(16px) saturate(1.2);
     border-left: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
     border-right: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 var(--fade), #000 calc(100% - var(--fade)), transparent 100%);
-    mask-image: linear-gradient(to bottom, transparent 0, #000 var(--fade), #000 calc(100% - var(--fade)), transparent 100%);
-    opacity: 0;
+    /* 缓动渐隐：越靠近末端变化越慢，没有可见的边 */
+    --ease-mask: linear-gradient(
+      to bottom,
+      transparent 0,
+      rgba(0, 0, 0, 0.03) 11px, rgba(0, 0, 0, 0.1) 22px, rgba(0, 0, 0, 0.24) 34px, rgba(0, 0, 0, 0.44) 47px,
+      rgba(0, 0, 0, 0.66) 59px, rgba(0, 0, 0, 0.85) 72px, rgba(0, 0, 0, 0.96) 83px, #000 90px,
+      #000 calc(100% - 90px),
+      rgba(0, 0, 0, 0.96) calc(100% - 83px), rgba(0, 0, 0, 0.85) calc(100% - 72px), rgba(0, 0, 0, 0.66) calc(100% - 59px),
+      rgba(0, 0, 0, 0.44) calc(100% - 47px), rgba(0, 0, 0, 0.24) calc(100% - 34px), rgba(0, 0, 0, 0.1) calc(100% - 22px),
+      rgba(0, 0, 0, 0.03) calc(100% - 11px), transparent 100%
+    );
+    -webkit-mask-image: var(--ease-mask);
+    mask-image: var(--ease-mask);
+    /* 底板不做淡入（浏览器在淡入过程中常常不渲染毛玻璃，会延迟半秒才出现），直接显示 */
     visibility: hidden;
-    transition: opacity 0.3s var(--ease) 0.15s, visibility 0s linear 0.45s; /* 只淡入淡出，不平移，按钮位置不动 */
+    transition: visibility 0s linear 0.2s;
   }
   .rail:hover .rail-panel,
   .rail:focus-within .rail-panel {
-    opacity: 1;
     visibility: visible;
-    transition: opacity 0.3s var(--ease) 0.06s, visibility 0s;
+    transition: visibility 0s linear 0.04s;
   }
+  /* 只让面板里的内容淡入 */
+  .rail-panel > * { opacity: 0; transition: opacity 0.25s var(--ease); }
+  .rail:hover .rail-panel > *,
+  .rail:focus-within .rail-panel > * { opacity: 1; transition-delay: 0.05s; }
   .rail:hover .rail-mini,
   .rail:focus-within .rail-mini { opacity: 0; transition-delay: 0s; }
   .rail-part + .rail-part { margin-top: 44px; }
@@ -712,7 +726,7 @@ const HERO_SIZES = '100vw';
     border-top: 1px solid var(--line);
     transition: border-color 0.9s var(--ease);
   }
-  .ch-head h2 { margin: 0; font-size: 13px; font-weight: 600; }
+  .ch-head h2 { margin: 0; font-size: 13px; font-weight: 500; letter-spacing: 0.04em; }
   .place { margin-left: auto; }
 
   .foot { display: flex; justify-content: space-between; gap: 16px; padding: 20vh var(--gutter) 28px; }
