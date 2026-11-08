@@ -15,7 +15,7 @@ const run = (cmd, opts = {}) => execSync(cmd, { stdio: 'inherit', cwd: root, ...
 const out = (cmd) => execSync(cmd, { cwd: root }).toString().trim();
 
 const remote = out('git remote get-url origin');           // https://github.com/<user>/<repo>.git
-const [, user, repo] = remote.match(/github\.com[:/]([^/]+)\/([^/.]+)/);
+const [, user, repo] = remote.match(/github\.com[:/]([^/]+)\/(.+?)(?:\.git)?$/);
 const isUserSite = repo.toLowerCase() === `${user.toLowerCase()}.github.io`;
 const env = { ...process.env, SITE: `https://${user}.github.io`, BASE: isUserSite ? '/' : `/${repo}/` };
 
