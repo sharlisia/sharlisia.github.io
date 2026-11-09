@@ -8,10 +8,11 @@ interface Props {
 }
 const { title, section } = Astro.props;
 const base = import.meta.env.BASE_URL;
+// live: false = 栏目还没有内容，显示为灰色、不能点的占位（页面文件暂存在 src/drafts/）
 const nav = [
-  { id: 'photo', label: 'Photo', href: `${base}photo/` },
-  { id: 'media', label: 'Media', href: `${base}media/` },
-  { id: 'graphic', label: 'Graphic', href: `${base}graphic/` },
+  { id: 'photo', label: 'Photo', href: `${base}photo/`, live: true },
+  { id: 'media', label: 'Media', href: `${base}media/`, live: false },
+  { id: 'graphic', label: 'Graphic', href: `${base}graphic/`, live: false },
 ] as const;
 ---
 
@@ -40,9 +41,11 @@ const nav = [
   <body>
     <header class="top">
       <div class="top-left">
-        <a href={base} class="mark" aria-current={section === 'home' ? 'page' : undefined}>Hi, I'm {site.name}</a>
+        <a href={`${base}photo/`} class="mark">Hi, I'm {site.name}</a>
         <nav class="sections" aria-label="Sections">
-          {nav.map((n) => <a href={n.href} aria-current={n.id === section ? 'page' : undefined}>{n.label}</a>)}
+          {nav.map((n) => n.live
+            ? <a href={n.href} aria-current={n.id === section ? 'page' : undefined}>{n.label}</a>
+            : <span class="soon" aria-disabled="true" title="Coming soon">{n.label}</span>)}
         </nav>
       </div>
       <div class="top-right">
@@ -72,7 +75,9 @@ const nav = [
     <div class="sheet" data-sheet hidden>
       <button type="button" class="sheet-close" data-menu-close>Close</button>
       <nav class="sheet-sections">
-        {nav.map((n) => <a href={n.href} aria-current={n.id === section ? 'page' : undefined}>{n.label}</a>)}
+        {nav.map((n) => n.live
+          ? <a href={n.href} aria-current={n.id === section ? 'page' : undefined}>{n.label}</a>
+          : <span class="soon" aria-disabled="true">{n.label}</span>)}
       </nav>
       <slot name="sheet" />
     </div>
@@ -166,8 +171,16 @@ const nav = [
     color: var(--soft);
     transition: color 0.3s;
   }
+  /* 还没上线的栏目：灰色、不能点 */
+  .soon {
+    color: var(--muted);
+    opacity: 0.55;
+    cursor: default;
+    user-select: none;
+  }
   /* 导航：大写、宽字距、极细 */
-  .sections a {
+  .sections a,
+  .sections .soon {
     font-size: 13px;
     font-weight: 300;
     letter-spacing: 0.16em;

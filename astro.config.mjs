@@ -36,4 +36,6 @@ export default defineConfig({
   base: process.env.BASE || '/',
   trailingSlash: 'always',
   integrations: [dropUnusedOriginals],
+  // 主页暂未上线：访问网站根地址时直接跳到照片页（页面文件在 src/drafts/）
+  redirects: { '/': '/photo/' },
 });

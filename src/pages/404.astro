@@ -8,7 +8,7 @@ const base = import.meta.env.BASE_URL;
   <script is:inline>
     (function () {
       var p = location.pathname;
-      var map = { '/media-art': '/media/', '/graphic-design': '/graphic/', '/photography': '/photo/' };
+      var map = { '/photography': '/photo/' }; // Media / Graphic 暂未上线，不再转发
       // 迁移前的旧前缀 /sharlisia/...
       var q = p.replace(/^\/sharlisia(?=\/|$)/, '') || '/';
       var key = q.replace(/\/+$/, '');
